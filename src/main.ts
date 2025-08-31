@@ -15,6 +15,12 @@ async function bootstrap() {
   
   // Включение CORS
   app.enableCors();
+  app.enableCors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  });
   
   // Конфигурация Swagger
   const config = new DocumentBuilder()

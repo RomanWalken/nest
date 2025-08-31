@@ -1,5 +1,6 @@
+import { DietaryCategory } from '@/common/types';
 export declare class CreateMealDto {
-    name: string;
+    title: string;
     description?: string;
     calories: number;
     proteins: number;
@@ -18,6 +19,9 @@ export declare class CreateMealDto {
         unit: string;
     }>;
     dietaryRestrictions?: string[];
+    dietaryCategory: DietaryCategory;
     courseId: string;
+    tariffs?: string[];
+    customUserId?: string;
     metadata?: Record<string, any>;
 }

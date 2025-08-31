@@ -45,7 +45,7 @@ __decorate([
     __metadata("design:type", String)
 ], User.prototype, "role", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, ref: 'Company', required: true }),
+    (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, ref: 'Company' }),
     __metadata("design:type", mongoose_2.Types.ObjectId)
 ], User.prototype, "companyId", void 0);
 __decorate([
@@ -72,7 +72,7 @@ exports.User = User = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], User);
 exports.UserSchema = mongoose_1.SchemaFactory.createForClass(User);
-exports.UserSchema.index({ email: 1, companyId: 1 }, { unique: true });
+exports.UserSchema.index({ email: 1 }, { unique: true });
 exports.UserSchema.index({ companyId: 1 });
 exports.UserSchema.index({ role: 1 });
 exports.UserSchema.index({ isActive: 1 });

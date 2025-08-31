@@ -1,5 +1,6 @@
-import { IsString, IsOptional, IsNumber, IsArray, IsObject, MaxLength, Min, IsUrl } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsArray, IsObject, MaxLength, Min, IsUrl, IsMongoId, IsEnum } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { DietaryCategory } from '@/common/types';
 
 export class CreateMealDto {
   @ApiProperty({ 
@@ -9,7 +10,7 @@ export class CreateMealDto {
   })
   @IsString()
   @MaxLength(200)
-  name: string;
+  title: string;
 
   @ApiPropertyOptional({ 
     description: 'Описание плана питания',
@@ -152,11 +153,39 @@ export class CreateMealDto {
   dietaryRestrictions?: string[];
 
   @ApiProperty({ 
+    description: 'Категория питания',
+    enum: DietaryCategory,
+    example: DietaryCategory.VEGETARIAN
+  })
+  @IsEnum(DietaryCategory)
+  dietaryCategory: DietaryCategory;
+
+  @ApiProperty({ 
     description: 'ID курса, к которому относится план питания',
     example: '507f1f77bcf86cd799439011'
   })
   @IsString()
+  @IsMongoId()
   courseId: string;
+
+  @ApiPropertyOptional({ 
+    description: 'ID тарифов, к которым привязан meal',
+    example: ['507f1f77bcf86cd799439012'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  tariffs?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'ID пользователя, для которого настроен meal (для модераторов)',
+    example: '507f1f77bcf86cd799439013'
+  })
+  @IsOptional()
+  @IsString()
+  @IsMongoId()
+  customUserId?: string;
 
   @ApiPropertyOptional({ 
     description: 'Дополнительные метаданные',

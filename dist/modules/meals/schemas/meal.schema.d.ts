@@ -1,4 +1,5 @@
 import { Document, Types } from 'mongoose';
+import { DietaryCategory } from '@/common/types';
 export type MealDocument = Meal & Document;
 export declare class Meal {
     title: string;
@@ -9,9 +10,13 @@ export declare class Meal {
     carbohydrates: number;
     image: string;
     recipe: string;
+    dietaryCategory: DietaryCategory;
     courseId: Types.ObjectId;
+    tariffs: Types.ObjectId[];
     ingredients: string[];
     metadata: Record<string, any>;
+    customUserId?: Types.ObjectId;
+    isCustom: boolean;
 }
 export declare const MealSchema: import("mongoose").Schema<Meal, import("mongoose").Model<Meal, any, any, any, Document<unknown, any, Meal, any, {}> & Meal & {
     _id: Types.ObjectId;

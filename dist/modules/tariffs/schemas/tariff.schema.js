@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.TariffSchema = exports.Tariff = void 0;
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
+const types_1 = require("../../../common/types");
 let Tariff = class Tariff {
 };
 exports.Tariff = Tariff;
@@ -24,9 +25,17 @@ __decorate([
     __metadata("design:type", String)
 ], Tariff.prototype, "description", void 0);
 __decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Tariff.prototype, "image", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ min: 0 }),
+    __metadata("design:type", Number)
+], Tariff.prototype, "oldPrice", void 0);
+__decorate([
     (0, mongoose_1.Prop)({ required: true, min: 0 }),
     __metadata("design:type", Number)
-], Tariff.prototype, "price", void 0);
+], Tariff.prototype, "newPrice", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ required: true, default: 'USD' }),
     __metadata("design:type", String)
@@ -36,9 +45,9 @@ __decorate([
     __metadata("design:type", Number)
 ], Tariff.prototype, "duration", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ default: true }),
-    __metadata("design:type", Boolean)
-], Tariff.prototype, "isActive", void 0);
+    (0, mongoose_1.Prop)({ type: String, enum: types_1.TariffStatus, default: types_1.TariffStatus.ACTIVE }),
+    __metadata("design:type", String)
+], Tariff.prototype, "status", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, ref: 'Course', required: true }),
     __metadata("design:type", mongoose_2.Types.ObjectId)
@@ -48,6 +57,18 @@ __decorate([
     __metadata("design:type", Array)
 ], Tariff.prototype, "lessonIds", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({ type: [mongoose_2.Types.ObjectId], ref: 'Workout', default: [] }),
+    __metadata("design:type", Array)
+], Tariff.prototype, "workoutIds", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: [String], default: [] }),
+    __metadata("design:type", Array)
+], Tariff.prototype, "advantages", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: false }),
+    __metadata("design:type", Boolean)
+], Tariff.prototype, "includesDoctor", void 0);
+__decorate([
     (0, mongoose_1.Prop)({ type: Object, default: {} }),
     __metadata("design:type", Object)
 ], Tariff.prototype, "features", void 0);
@@ -56,7 +77,9 @@ exports.Tariff = Tariff = __decorate([
 ], Tariff);
 exports.TariffSchema = mongoose_1.SchemaFactory.createForClass(Tariff);
 exports.TariffSchema.index({ courseId: 1 });
-exports.TariffSchema.index({ isActive: 1 });
-exports.TariffSchema.index({ price: 1 });
+exports.TariffSchema.index({ status: 1 });
+exports.TariffSchema.index({ newPrice: 1 });
 exports.TariffSchema.index({ duration: 1 });
+exports.TariffSchema.index({ lessonIds: 1 });
+exports.TariffSchema.index({ workoutIds: 1 });
 //# sourceMappingURL=tariff.schema.js.map

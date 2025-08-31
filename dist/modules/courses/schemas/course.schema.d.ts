@@ -1,20 +1,28 @@
 import { Document, Types } from 'mongoose';
-import { CourseType, DifficultyLevel } from '@/common/types';
+import { CourseKind, CourseCategory, DifficultyLevel, CoursePublicationStatus } from '@/common/types';
 export type CourseDocument = Course & Document;
 export declare class Course {
     title: string;
     slug: string;
     description: string;
-    type: CourseType;
+    kind: CourseKind;
+    category: CourseCategory;
     thumbnail: string;
     duration: number;
     difficulty: DifficultyLevel;
-    isPublished: boolean;
+    publicationStatus: CoursePublicationStatus;
     isFeatured: boolean;
+    isPaid: boolean;
     companyId: Types.ObjectId;
     authorId: Types.ObjectId;
     tags: string[];
     metadata: Record<string, any>;
+    meals: Types.ObjectId[];
+    teachers: Types.ObjectId[];
+    workouts: Types.ObjectId[];
+    hasMeals: boolean;
+    hasDoctor: boolean;
+    modules: Types.ObjectId[];
 }
 export declare const CourseSchema: import("mongoose").Schema<Course, import("mongoose").Model<Course, any, any, any, Document<unknown, any, Course, any, {}> & Course & {
     _id: Types.ObjectId;

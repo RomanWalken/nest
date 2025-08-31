@@ -1,6 +1,6 @@
-import { IsString, IsOptional, IsEnum, IsBoolean, IsNumber, IsArray, IsObject, Min, MaxLength, IsUrl } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsBoolean, IsNumber, IsArray, IsObject, Min, MaxLength, IsUrl, IsMongoId } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { CourseType, DifficultyLevel } from '@/common/types';
+import { CourseKind, CourseCategory, DifficultyLevel, CoursePublicationStatus } from '@/common/types';
 
 export class CreateCourseDto {
   @ApiProperty({ 
@@ -31,12 +31,20 @@ export class CreateCourseDto {
   description?: string;
 
   @ApiProperty({ 
-    description: 'Тип курса (fitness - фитнес, video - видео, cooking - кулинария, custom - пользовательский)',
-    enum: CourseType,
-    example: CourseType.FITNESS
+    description: 'Вид курса (regular - обычный курс, fitness - фитнес курс)',
+    enum: CourseKind,
+    example: CourseKind.FITNESS
   })
-  @IsEnum(CourseType)
-  type: CourseType;
+  @IsEnum(CourseKind)
+  kind: CourseKind;
+
+  @ApiProperty({ 
+    description: 'Категория курса (видео, кулинария, фитнес-тренировки, йога и т.д.)',
+    enum: CourseCategory,
+    example: CourseCategory.FITNESS_TRAINING
+  })
+  @IsEnum(CourseCategory)
+  category: CourseCategory;
 
   @ApiPropertyOptional({ 
     description: 'URL превью курса (изображение)',
@@ -70,13 +78,14 @@ export class CreateCourseDto {
   difficulty?: DifficultyLevel;
 
   @ApiPropertyOptional({ 
-    description: 'Статус публикации курса. Неопубликованные курсы видны только авторам и модераторам',
-    example: false,
-    default: false
+    description: 'Статус публикации курса',
+    enum: CoursePublicationStatus,
+    example: CoursePublicationStatus.DRAFT,
+    default: CoursePublicationStatus.DRAFT
   })
   @IsOptional()
-  @IsBoolean()
-  isPublished?: boolean;
+  @IsEnum(CoursePublicationStatus)
+  publicationStatus?: CoursePublicationStatus;
 
   @ApiPropertyOptional({ 
     description: 'Рекомендуемый курс. Рекомендуемые курсы отображаются в специальных разделах',
@@ -86,6 +95,15 @@ export class CreateCourseDto {
   @IsOptional()
   @IsBoolean()
   isFeatured?: boolean;
+
+  @ApiPropertyOptional({ 
+    description: 'Платный или бесплатный курс',
+    example: true,
+    default: false
+  })
+  @IsOptional()
+  @IsBoolean()
+  isPaid?: boolean;
 
   @ApiPropertyOptional({ 
     description: 'Теги для поиска и категоризации (максимум 20 тегов)',
@@ -110,4 +128,64 @@ export class CreateCourseDto {
   @IsOptional()
   @IsObject()
   metadata?: Record<string, any>;
+
+  // Специфичные для фитнес-курсов поля
+  @ApiPropertyOptional({ 
+    description: 'ID приемов пищи (только для фитнес-курсов)',
+    example: ['507f1f77bcf86cd799439011'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  meals?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'ID преподавателей (только для фитнес-курсов)',
+    example: ['507f1f77bcf86cd799439012'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  teachers?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'ID тренировок (только для фитнес-курсов)',
+    example: ['507f1f77bcf86cd799439013'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  workouts?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'Будет ли у курса meals (только для фитнес-курсов)',
+    example: true,
+    default: false
+  })
+  @IsOptional()
+  @IsBoolean()
+  hasMeals?: boolean;
+
+  @ApiPropertyOptional({ 
+    description: 'Будет ли у курса доктор',
+    example: false,
+    default: false
+  })
+  @IsOptional()
+  @IsBoolean()
+  hasDoctor?: boolean;
+
+  // Специфичные для обычных курсов поля
+  @ApiPropertyOptional({ 
+    description: 'ID модулей (только для обычных курсов)',
+    example: ['507f1f77bcf86cd799439014'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  modules?: string[];
 } 

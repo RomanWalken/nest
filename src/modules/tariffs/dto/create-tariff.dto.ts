@@ -1,6 +1,6 @@
-import { IsString, IsNumber, IsOptional, IsBoolean, IsArray, IsObject, Min, MaxLength, Max } from 'class-validator';
+import { IsString, IsNumber, IsOptional, IsBoolean, IsArray, IsObject, Min, MaxLength, Max, IsMongoId, IsUrl } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Types } from 'mongoose';
+import { TariffStatus } from '@/common/types';
 
 export class CreateTariffDto {
   @ApiProperty({ 
@@ -22,8 +22,30 @@ export class CreateTariffDto {
   @MaxLength(500)
   description?: string;
 
+  @ApiPropertyOptional({ 
+    description: 'URL изображения тарифа',
+    example: 'https://uploadthings.io/images/basic-tariff.jpg',
+    format: 'uri'
+  })
+  @IsOptional()
+  @IsString()
+  @IsUrl()
+  image?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Старая цена тарифа (для отображения скидки)',
+    example: 49.99,
+    minimum: 0,
+    maximum: 9999.99
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(9999.99)
+  oldPrice?: number;
+
   @ApiProperty({ 
-    description: 'Цена тарифа',
+    description: 'Новая цена тарифа (основная цена для оплаты)',
     example: 29.99,
     minimum: 0,
     maximum: 9999.99
@@ -31,7 +53,7 @@ export class CreateTariffDto {
   @IsNumber()
   @Min(0)
   @Max(9999.99)
-  price: number;
+  newPrice: number;
 
   @ApiPropertyOptional({ 
     description: 'Валюта тарифа',
@@ -55,29 +77,61 @@ export class CreateTariffDto {
   duration: number;
 
   @ApiPropertyOptional({ 
-    description: 'Активен ли тариф для покупки',
-    example: true,
-    default: true
+    description: 'Статус тарифа',
+    enum: TariffStatus,
+    example: TariffStatus.ACTIVE,
+    default: TariffStatus.ACTIVE
   })
   @IsOptional()
-  @IsBoolean()
-  isActive?: boolean;
+  @IsString()
+  status?: TariffStatus;
 
   @ApiProperty({ 
     description: 'ID курса, к которому относится тариф',
     example: '507f1f77bcf86cd799439011'
   })
   @IsString()
+  @IsMongoId()
   courseId: string;
 
   @ApiPropertyOptional({ 
-    description: 'ID уроков, доступных по данному тарифу',
+    description: 'ID уроков, доступных по данному тарифу (для обычных курсов)',
     example: ['507f1f77bcf86cd799439012', '507f1f77bcf86cd799439013'],
     type: [String]
   })
   @IsOptional()
   @IsArray()
+  @IsMongoId({ each: true })
   lessonIds?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'ID тренировок, доступных по данному тарифу (для фитнес-курсов)',
+    example: ['507f1f77bcf86cd799439014', '507f1f77bcf86cd799439015'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  workoutIds?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'Преимущества тарифа',
+    example: ['Доступ ко всем урокам', 'Сертификат по окончании', 'Поддержка в чате'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  advantages?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'Включает ли тариф доктора',
+    example: false,
+    default: false
+  })
+  @IsOptional()
+  @IsBoolean()
+  includesDoctor?: boolean;
 
   @ApiPropertyOptional({ 
     description: 'Дополнительные возможности и особенности тарифа',

@@ -52,7 +52,7 @@ let AuthService = class AuthService {
         const user = await this.usersService.create({
             ...createUserDto,
             password: hashedPassword,
-        }, companyId || 'default-company-id');
+        }, companyId);
         return this.login(user);
     }
 };

@@ -12,22 +12,24 @@ export class UsersService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
-  async create(createUserDto: CreateUserDto, companyId: string): Promise<User> {
-    // Проверяем уникальность email в рамках компании
+  async create(createUserDto: CreateUserDto, companyId?: string): Promise<User> {
+    // Проверяем уникальность email
     const existingUser = await this.userModel.findOne({
       email: createUserDto.email,
-      companyId: new Types.ObjectId(companyId),
     });
 
     if (existingUser) {
-      throw new ConflictException('Пользователь с таким email уже существует в этой компании');
+      throw new ConflictException('Пользователь с таким email уже существует');
     }
 
-    const user = new this.userModel({
-      ...createUserDto,
-      companyId: new Types.ObjectId(companyId),
-    });
+    const userData: any = { ...createUserDto };
+    
+    // Добавляем companyId только если он передан и валиден
+    if (companyId && Types.ObjectId.isValid(companyId)) {
+      userData.companyId = new Types.ObjectId(companyId);
+    }
 
+    const user = new this.userModel(userData);
     return user.save();
   }
 

@@ -46,11 +46,10 @@ export class AuthService {
   async register(createUserDto: any, companyId?: string) {
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     
-    // Если companyId не передан, создаем временную компанию или используем дефолтную
     const user = await this.usersService.create({
       ...createUserDto,
       password: hashedPassword,
-    }, companyId || 'default-company-id');
+    }, companyId);
     
     return this.login(user);
   }

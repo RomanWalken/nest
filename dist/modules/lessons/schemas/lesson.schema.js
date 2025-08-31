@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.LessonSchema = exports.Lesson = void 0;
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
+const types_1 = require("../../../common/types");
 let Lesson = class Lesson {
 };
 exports.Lesson = Lesson;
@@ -27,6 +28,10 @@ __decorate([
     (0, mongoose_1.Prop)(),
     __metadata("design:type", String)
 ], Lesson.prototype, "content", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: String, enum: types_1.LessonType, required: true }),
+    __metadata("design:type", String)
+], Lesson.prototype, "type", void 0);
 __decorate([
     (0, mongoose_1.Prop)(),
     __metadata("design:type", String)
@@ -48,6 +53,10 @@ __decorate([
     __metadata("design:type", mongoose_2.Types.ObjectId)
 ], Lesson.prototype, "moduleId", void 0);
 __decorate([
+    (0, mongoose_1.Prop)({ type: [mongoose_2.Types.ObjectId], ref: 'Tariff', default: [] }),
+    __metadata("design:type", Array)
+], Lesson.prototype, "tariffs", void 0);
+__decorate([
     (0, mongoose_1.Prop)({ type: [String], default: [] }),
     __metadata("design:type", Array)
 ], Lesson.prototype, "attachments", void 0);
@@ -55,6 +64,14 @@ __decorate([
     (0, mongoose_1.Prop)({ type: Object, default: {} }),
     __metadata("design:type", Object)
 ], Lesson.prototype, "metadata", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: Object, default: {} }),
+    __metadata("design:type", Object)
+], Lesson.prototype, "quizData", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: Object, default: {} }),
+    __metadata("design:type", Object)
+], Lesson.prototype, "presentationData", void 0);
 exports.Lesson = Lesson = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], Lesson);
@@ -62,4 +79,6 @@ exports.LessonSchema = mongoose_1.SchemaFactory.createForClass(Lesson);
 exports.LessonSchema.index({ moduleId: 1, order: 1 });
 exports.LessonSchema.index({ moduleId: 1 });
 exports.LessonSchema.index({ isFree: 1 });
+exports.LessonSchema.index({ type: 1 });
+exports.LessonSchema.index({ tariffs: 1 });
 //# sourceMappingURL=lesson.schema.js.map

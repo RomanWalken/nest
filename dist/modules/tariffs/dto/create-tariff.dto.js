@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateTariffDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
+const types_1 = require("../../../common/types");
 class CreateTariffDto {
 }
 exports.CreateTariffDto = CreateTariffDto;
@@ -37,8 +38,32 @@ __decorate([
     __metadata("design:type", String)
 ], CreateTariffDto.prototype, "description", void 0);
 __decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'URL изображения тарифа',
+        example: 'https://uploadthings.io/images/basic-tariff.jpg',
+        format: 'uri'
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsUrl)(),
+    __metadata("design:type", String)
+], CreateTariffDto.prototype, "image", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Старая цена тарифа (для отображения скидки)',
+        example: 49.99,
+        minimum: 0,
+        maximum: 9999.99
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    (0, class_validator_1.Min)(0),
+    (0, class_validator_1.Max)(9999.99),
+    __metadata("design:type", Number)
+], CreateTariffDto.prototype, "oldPrice", void 0);
+__decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Цена тарифа',
+        description: 'Новая цена тарифа (основная цена для оплаты)',
         example: 29.99,
         minimum: 0,
         maximum: 9999.99
@@ -47,7 +72,7 @@ __decorate([
     (0, class_validator_1.Min)(0),
     (0, class_validator_1.Max)(9999.99),
     __metadata("design:type", Number)
-], CreateTariffDto.prototype, "price", void 0);
+], CreateTariffDto.prototype, "newPrice", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'Валюта тарифа',
@@ -73,32 +98,67 @@ __decorate([
 ], CreateTariffDto.prototype, "duration", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
-        description: 'Активен ли тариф для покупки',
-        example: true,
-        default: true
+        description: 'Статус тарифа',
+        enum: types_1.TariffStatus,
+        example: types_1.TariffStatus.ACTIVE,
+        default: types_1.TariffStatus.ACTIVE
     }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], CreateTariffDto.prototype, "isActive", void 0);
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateTariffDto.prototype, "status", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'ID курса, к которому относится тариф',
         example: '507f1f77bcf86cd799439011'
     }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsMongoId)(),
     __metadata("design:type", String)
 ], CreateTariffDto.prototype, "courseId", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
-        description: 'ID уроков, доступных по данному тарифу',
+        description: 'ID уроков, доступных по данному тарифу (для обычных курсов)',
         example: ['507f1f77bcf86cd799439012', '507f1f77bcf86cd799439013'],
         type: [String]
     }),
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsMongoId)({ each: true }),
     __metadata("design:type", Array)
 ], CreateTariffDto.prototype, "lessonIds", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'ID тренировок, доступных по данному тарифу (для фитнес-курсов)',
+        example: ['507f1f77bcf86cd799439014', '507f1f77bcf86cd799439015'],
+        type: [String]
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsMongoId)({ each: true }),
+    __metadata("design:type", Array)
+], CreateTariffDto.prototype, "workoutIds", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Преимущества тарифа',
+        example: ['Доступ ко всем урокам', 'Сертификат по окончании', 'Поддержка в чате'],
+        type: [String]
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], CreateTariffDto.prototype, "advantages", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Включает ли тариф доктора',
+        example: false,
+        default: false
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreateTariffDto.prototype, "includesDoctor", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'Дополнительные возможности и особенности тарифа',

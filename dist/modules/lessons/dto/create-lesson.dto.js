@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateLessonDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
+const types_1 = require("../../../common/types");
 class CreateLessonDto {
 }
 exports.CreateLessonDto = CreateLessonDto;
@@ -48,8 +49,17 @@ __decorate([
     __metadata("design:type", String)
 ], CreateLessonDto.prototype, "content", void 0);
 __decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Тип урока',
+        enum: types_1.LessonType,
+        example: types_1.LessonType.VIDEO
+    }),
+    (0, class_validator_1.IsEnum)(types_1.LessonType),
+    __metadata("design:type", String)
+], CreateLessonDto.prototype, "type", void 0);
+__decorate([
     (0, swagger_1.ApiPropertyOptional)({
-        description: 'URL видео урока',
+        description: 'URL видео урока (только для видео уроков)',
         example: 'https://bunny.net/video/lesson-basic-exercises.mp4',
         format: 'uri'
     }),
@@ -95,8 +105,20 @@ __decorate([
         example: '507f1f77bcf86cd799439011'
     }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsMongoId)(),
     __metadata("design:type", String)
 ], CreateLessonDto.prototype, "moduleId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'ID тарифов, к которым привязан урок (если урок не бесплатный)',
+        example: ['507f1f77bcf86cd799439012'],
+        type: [String]
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsMongoId)({ each: true }),
+    __metadata("design:type", Array)
+], CreateLessonDto.prototype, "tariffs", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'Прикрепленные файлы к уроку',
@@ -117,6 +139,37 @@ __decorate([
     (0, class_validator_1.IsArray)(),
     __metadata("design:type", Array)
 ], CreateLessonDto.prototype, "attachments", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Данные для опроса (только для уроков типа QUIZ)',
+        example: {
+            questions: [
+                {
+                    question: 'Какое упражнение лучше всего подходит для начинающих?',
+                    options: ['Приседания', 'Отжимания', 'Планка'],
+                    correctAnswer: 2
+                }
+            ]
+        }
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsObject)(),
+    __metadata("design:type", Object)
+], CreateLessonDto.prototype, "quizData", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Данные для презентации (только для уроков типа PRESENTATION)',
+        example: {
+            slides: [
+                { title: 'Введение', content: 'Добро пожаловать в курс' },
+                { title: 'Основы', content: 'Базовые принципы фитнеса' }
+            ]
+        }
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsObject)(),
+    __metadata("design:type", Object)
+], CreateLessonDto.prototype, "presentationData", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'Дополнительные метаданные урока',

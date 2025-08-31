@@ -20,6 +20,7 @@ const tariffs_module_1 = require("./modules/tariffs/tariffs.module");
 const meals_module_1 = require("./modules/meals/meals.module");
 const progress_module_1 = require("./modules/progress/progress.module");
 const purchases_module_1 = require("./modules/purchases/purchases.module");
+const teachers_module_1 = require("./modules/teachers/teachers.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -41,6 +42,7 @@ exports.AppModule = AppModule = __decorate([
             meals_module_1.MealsModule,
             progress_module_1.ProgressModule,
             purchases_module_1.PurchasesModule,
+            teachers_module_1.TeachersModule,
         ],
     })
 ], AppModule);

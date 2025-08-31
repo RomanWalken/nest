@@ -1,5 +1,6 @@
-import { IsString, IsOptional, IsBoolean, IsNumber, IsArray, IsObject, MaxLength, Min, IsUrl } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsBoolean, IsNumber, IsArray, IsObject, Min, MaxLength, IsUrl, IsMongoId } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { LessonType } from '@/common/types';
 
 export class CreateLessonDto {
   @ApiProperty({ 
@@ -31,8 +32,16 @@ export class CreateLessonDto {
   @MaxLength(10000)
   content?: string;
 
+  @ApiProperty({ 
+    description: 'Тип урока',
+    enum: LessonType,
+    example: LessonType.VIDEO
+  })
+  @IsEnum(LessonType)
+  type: LessonType;
+
   @ApiPropertyOptional({ 
-    description: 'URL видео урока',
+    description: 'URL видео урока (только для видео уроков)',
     example: 'https://bunny.net/video/lesson-basic-exercises.mp4',
     format: 'uri'
   })
@@ -74,7 +83,18 @@ export class CreateLessonDto {
     example: '507f1f77bcf86cd799439011'
   })
   @IsString()
+  @IsMongoId()
   moduleId: string;
+
+  @ApiPropertyOptional({ 
+    description: 'ID тарифов, к которым привязан урок (если урок не бесплатный)',
+    example: ['507f1f77bcf86cd799439012'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  tariffs?: string[];
 
   @ApiPropertyOptional({ 
     description: 'Прикрепленные файлы к уроку',
@@ -98,6 +118,35 @@ export class CreateLessonDto {
     url: string;
     type: string;
   }>;
+
+  @ApiPropertyOptional({ 
+    description: 'Данные для опроса (только для уроков типа QUIZ)',
+    example: {
+      questions: [
+        {
+          question: 'Какое упражнение лучше всего подходит для начинающих?',
+          options: ['Приседания', 'Отжимания', 'Планка'],
+          correctAnswer: 2
+        }
+      ]
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  quizData?: Record<string, any>;
+
+  @ApiPropertyOptional({ 
+    description: 'Данные для презентации (только для уроков типа PRESENTATION)',
+    example: {
+      slides: [
+        { title: 'Введение', content: 'Добро пожаловать в курс' },
+        { title: 'Основы', content: 'Базовые принципы фитнеса' }
+      ]
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  presentationData?: Record<string, any>;
 
   @ApiPropertyOptional({ 
     description: 'Дополнительные метаданные урока',

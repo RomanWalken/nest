@@ -48,13 +48,22 @@ __decorate([
 ], CreateCourseDto.prototype, "description", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Тип курса (fitness - фитнес, video - видео, cooking - кулинария, custom - пользовательский)',
-        enum: types_1.CourseType,
-        example: types_1.CourseType.FITNESS
+        description: 'Вид курса (regular - обычный курс, fitness - фитнес курс)',
+        enum: types_1.CourseKind,
+        example: types_1.CourseKind.FITNESS
     }),
-    (0, class_validator_1.IsEnum)(types_1.CourseType),
+    (0, class_validator_1.IsEnum)(types_1.CourseKind),
     __metadata("design:type", String)
-], CreateCourseDto.prototype, "type", void 0);
+], CreateCourseDto.prototype, "kind", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Категория курса (видео, кулинария, фитнес-тренировки, йога и т.д.)',
+        enum: types_1.CourseCategory,
+        example: types_1.CourseCategory.FITNESS_TRAINING
+    }),
+    (0, class_validator_1.IsEnum)(types_1.CourseCategory),
+    __metadata("design:type", String)
+], CreateCourseDto.prototype, "category", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'URL превью курса (изображение)',
@@ -91,14 +100,15 @@ __decorate([
 ], CreateCourseDto.prototype, "difficulty", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
-        description: 'Статус публикации курса. Неопубликованные курсы видны только авторам и модераторам',
-        example: false,
-        default: false
+        description: 'Статус публикации курса',
+        enum: types_1.CoursePublicationStatus,
+        example: types_1.CoursePublicationStatus.DRAFT,
+        default: types_1.CoursePublicationStatus.DRAFT
     }),
     (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsBoolean)(),
-    __metadata("design:type", Boolean)
-], CreateCourseDto.prototype, "isPublished", void 0);
+    (0, class_validator_1.IsEnum)(types_1.CoursePublicationStatus),
+    __metadata("design:type", String)
+], CreateCourseDto.prototype, "publicationStatus", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'Рекомендуемый курс. Рекомендуемые курсы отображаются в специальных разделах',
@@ -109,6 +119,16 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], CreateCourseDto.prototype, "isFeatured", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Платный или бесплатный курс',
+        example: true,
+        default: false
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreateCourseDto.prototype, "isPaid", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'Теги для поиска и категоризации (максимум 20 тегов)',
@@ -135,4 +155,68 @@ __decorate([
     (0, class_validator_1.IsObject)(),
     __metadata("design:type", Object)
 ], CreateCourseDto.prototype, "metadata", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'ID приемов пищи (только для фитнес-курсов)',
+        example: ['507f1f77bcf86cd799439011'],
+        type: [String]
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsMongoId)({ each: true }),
+    __metadata("design:type", Array)
+], CreateCourseDto.prototype, "meals", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'ID преподавателей (только для фитнес-курсов)',
+        example: ['507f1f77bcf86cd799439012'],
+        type: [String]
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsMongoId)({ each: true }),
+    __metadata("design:type", Array)
+], CreateCourseDto.prototype, "teachers", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'ID тренировок (только для фитнес-курсов)',
+        example: ['507f1f77bcf86cd799439013'],
+        type: [String]
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsMongoId)({ each: true }),
+    __metadata("design:type", Array)
+], CreateCourseDto.prototype, "workouts", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Будет ли у курса meals (только для фитнес-курсов)',
+        example: true,
+        default: false
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreateCourseDto.prototype, "hasMeals", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Будет ли у курса доктор',
+        example: false,
+        default: false
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsBoolean)(),
+    __metadata("design:type", Boolean)
+], CreateCourseDto.prototype, "hasDoctor", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'ID модулей (только для обычных курсов)',
+        example: ['507f1f77bcf86cd799439014'],
+        type: [String]
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsMongoId)({ each: true }),
+    __metadata("design:type", Array)
+], CreateCourseDto.prototype, "modules", void 0);
 //# sourceMappingURL=create-course.dto.js.map

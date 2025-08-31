@@ -12,6 +12,12 @@ async function bootstrap() {
         transform: true
     }));
     app.enableCors();
+    app.enableCors({
+        origin: '*',
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        credentials: true,
+    });
     const config = new swagger_1.DocumentBuilder()
         .setTitle('Online Courses Platform API')
         .setDescription(`

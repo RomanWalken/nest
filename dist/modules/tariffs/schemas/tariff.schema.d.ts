@@ -1,14 +1,20 @@
 import { Document, Types } from 'mongoose';
+import { TariffStatus } from '@/common/types';
 export type TariffDocument = Tariff & Document;
 export declare class Tariff {
     name: string;
     description: string;
-    price: number;
+    image: string;
+    oldPrice?: number;
+    newPrice: number;
     currency: string;
     duration: number;
-    isActive: boolean;
+    status: TariffStatus;
     courseId: Types.ObjectId;
     lessonIds: Types.ObjectId[];
+    workoutIds: Types.ObjectId[];
+    advantages: string[];
+    includesDoctor: boolean;
     features: Record<string, any>;
 }
 export declare const TariffSchema: import("mongoose").Schema<Tariff, import("mongoose").Model<Tariff, any, any, any, Document<unknown, any, Tariff, any, {}> & Tariff & {

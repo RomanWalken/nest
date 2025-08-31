@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateMealDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
+const types_1 = require("../../../common/types");
 class CreateMealDto {
 }
 exports.CreateMealDto = CreateMealDto;
@@ -24,7 +25,7 @@ __decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.MaxLength)(200),
     __metadata("design:type", String)
-], CreateMealDto.prototype, "name", void 0);
+], CreateMealDto.prototype, "title", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'Описание плана питания',
@@ -177,12 +178,43 @@ __decorate([
 ], CreateMealDto.prototype, "dietaryRestrictions", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
+        description: 'Категория питания',
+        enum: types_1.DietaryCategory,
+        example: types_1.DietaryCategory.VEGETARIAN
+    }),
+    (0, class_validator_1.IsEnum)(types_1.DietaryCategory),
+    __metadata("design:type", String)
+], CreateMealDto.prototype, "dietaryCategory", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
         description: 'ID курса, к которому относится план питания',
         example: '507f1f77bcf86cd799439011'
     }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsMongoId)(),
     __metadata("design:type", String)
 ], CreateMealDto.prototype, "courseId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'ID тарифов, к которым привязан meal',
+        example: ['507f1f77bcf86cd799439012'],
+        type: [String]
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsMongoId)({ each: true }),
+    __metadata("design:type", Array)
+], CreateMealDto.prototype, "tariffs", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'ID пользователя, для которого настроен meal (для модераторов)',
+        example: '507f1f77bcf86cd799439013'
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsMongoId)(),
+    __metadata("design:type", String)
+], CreateMealDto.prototype, "customUserId", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
         description: 'Дополнительные метаданные',

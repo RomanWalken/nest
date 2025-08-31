@@ -27,7 +27,7 @@ export class User {
   @Prop({ type: String, enum: UserRole, default: UserRole.STUDENT })
   role: UserRole;
 
-  @Prop({ type: Types.ObjectId, ref: 'Company', required: true })
+  @Prop({ type: Types.ObjectId, ref: 'Company' })
   companyId: Types.ObjectId;
 
   @Prop({ default: true })
@@ -49,7 +49,7 @@ export class User {
 export const UserSchema = SchemaFactory.createForClass(User);
 
 // Индексы
-UserSchema.index({ email: 1, companyId: 1 }, { unique: true });
+UserSchema.index({ email: 1 }, { unique: true });
 UserSchema.index({ companyId: 1 });
 UserSchema.index({ role: 1 });
 UserSchema.index({ isActive: 1 });

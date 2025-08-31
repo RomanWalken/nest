@@ -17,7 +17,7 @@ import { UpdateCourseDto } from './dto/update-course.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { UserRole } from '@/common/types';
+import { UserRole, CourseKind, CoursePublicationStatus } from '@/common/types';
 import { PaginationDto } from '@/common/types';
 
 @ApiTags('courses')
@@ -42,9 +42,10 @@ export class CoursesController {
         title: 'Основы фитнеса для начинающих',
         slug: 'osnovy-fitnesa-dlya-nachinayushchih',
         description: 'Комплексный курс по фитнесу...',
-        type: 'fitness',
+        kind: 'fitness',
+        category: 'fitness_training',
         difficulty: 'beginner',
-        isPublished: false,
+        publicationStatus: 'draft',
         isFeatured: false,
         companyId: '507f1f77bcf86cd799439012',
         authorId: '507f1f77bcf86cd799439013',
@@ -68,6 +69,7 @@ export class CoursesController {
   })
   @ApiQuery({ name: 'page', required: false, description: 'Номер страницы (по умолчанию 1)', example: 1 })
   @ApiQuery({ name: 'limit', required: false, description: 'Количество курсов на странице (по умолчанию 10)', example: 10 })
+  @ApiQuery({ name: 'kind', required: false, description: 'Вид курса (regular или fitness)', enum: CourseKind, example: CourseKind.FITNESS })
   @ApiResponse({ 
     status: 200, 
     description: 'Список курсов получен',
@@ -78,9 +80,10 @@ export class CoursesController {
             _id: '507f1f77bcf86cd799439011',
             title: 'Основы фитнеса для начинающих',
             slug: 'osnovy-fitnesa-dlya-nachinayushchih',
-            type: 'fitness',
+            kind: 'fitness',
+            category: 'fitness_training',
             difficulty: 'beginner',
-            isPublished: true,
+            publicationStatus: 'published',
             isFeatured: false,
             authorId: {
               _id: '507f1f77bcf86cd799439013',
@@ -104,11 +107,54 @@ export class CoursesController {
       }
     }
   })
-  findAll(@Query() paginationDto: PaginationDto, @Request() req) {
+  findAll(@Query() paginationDto: PaginationDto, @Request() req, @Query('kind') kind?: CourseKind) {
     // Для публичного API показываем только опубликованные курсы
     // Для авторизованных пользователей показываем курсы их компании
     const companyId = req.user?.companyId;
-    return this.coursesService.findAll(paginationDto, companyId);
+    return this.coursesService.findAll(paginationDto, companyId, kind);
+  }
+
+  @Get('fitness')
+  @ApiOperation({ 
+    summary: 'Получить список фитнес-курсов',
+    description: 'Возвращает только фитнес-курсы с meals, teachers и workouts. Для авторизованных пользователей показываются курсы их компании.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Список фитнес-курсов получен'
+  })
+  findFitnessCourses(@Request() req) {
+    const companyId = req.user?.companyId;
+    return this.coursesService.findFitnessCourses(companyId);
+  }
+
+  @Get('regular')
+  @ApiOperation({ 
+    summary: 'Получить список обычных курсов',
+    description: 'Возвращает только обычные курсы (видео, кулинария и т.д.). Для авторизованных пользователей показываются курсы их компании.'
+  })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Список обычных курсов получен'
+  })
+  findRegularCourses(@Request() req) {
+    const companyId = req.user?.companyId;
+    return this.coursesService.findRegularCourses(companyId);
+  }
+
+  @Get('category/:category')
+  @ApiOperation({ 
+    summary: 'Получить курсы по категории',
+    description: 'Возвращает курсы определенной категории (видео, кулинария, фитнес-тренировки и т.д.).'
+  })
+  @ApiParam({ name: 'category', description: 'Категория курса', example: 'fitness_training' })
+  @ApiResponse({ 
+    status: 200, 
+    description: 'Список курсов по категории получен'
+  })
+  findByCategory(@Param('category') category: string, @Request() req) {
+    const companyId = req.user?.companyId;
+    return this.coursesService.findByCategory(category, companyId);
   }
 
   @Get('published')
@@ -125,9 +171,10 @@ export class CoursesController {
           _id: '507f1f77bcf86cd799439011',
           title: 'Основы фитнеса для начинающих',
           slug: 'osnovy-fitnesa-dlya-nachinayushchih',
-          type: 'fitness',
+          kind: 'fitness',
+          category: 'fitness_training',
           difficulty: 'beginner',
-          isPublished: true,
+          publicationStatus: 'published',
           isFeatured: false
         }
       ]
@@ -153,9 +200,10 @@ export class CoursesController {
         title: 'Основы фитнеса для начинающих',
         slug: 'osnovy-fitnesa-dlya-nachinayushchih',
         description: 'Комплексный курс по фитнесу...',
-        type: 'fitness',
+        kind: 'fitness',
+        category: 'fitness_training',
         difficulty: 'beginner',
-        isPublished: true,
+        publicationStatus: 'published',
         isFeatured: false,
         authorId: {
           _id: '507f1f77bcf86cd799439013',
@@ -194,7 +242,7 @@ export class CoursesController {
         title: 'Основы фитнеса для начинающих (обновлено)',
         slug: 'osnovy-fitnesa-dlya-nachinayushchih',
         description: 'Обновленное описание курса...',
-        isPublished: true
+        publicationStatus: 'published'
       }
     }
   })
@@ -230,5 +278,69 @@ export class CoursesController {
   @ApiResponse({ status: 404, description: 'Курс не найден' })
   remove(@Param('id') id: string) {
     return this.coursesService.remove(id);
+  }
+
+  // Новые endpoints для управления фитнес-курсами
+
+  @Post(':id/meals/:mealId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ 
+    summary: 'Добавить прием пищи к фитнес-курсу',
+    description: 'Добавляет прием пищи к фитнес-курсу. Доступно только модераторам, администраторам и выше.'
+  })
+  @ApiParam({ name: 'id', description: 'ID курса', example: '507f1f77bcf86cd799439011' })
+  @ApiParam({ name: 'mealId', description: 'ID приема пищи', example: '507f1f77bcf86cd799439014' })
+  @ApiResponse({ status: 200, description: 'Прием пищи успешно добавлен к курсу' })
+  @ApiResponse({ status: 400, description: 'Можно добавлять приемы пищи только к фитнес-курсам' })
+  addMealToCourse(@Param('id') id: string, @Param('mealId') mealId: string) {
+    return this.coursesService.addMealToCourse(id, mealId);
+  }
+
+  @Delete(':id/meals/:mealId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ 
+    summary: 'Убрать прием пищи у фитнес-курса',
+    description: 'Убирает прием пищи у фитнес-курса. Доступно только модераторам, администраторам и выше.'
+  })
+  @ApiParam({ name: 'id', description: 'ID курса', example: '507f1f77bcf86cd799439011' })
+  @ApiParam({ name: 'mealId', description: 'ID приема пищи', example: '507f1f77bcf86cd799439014' })
+  @ApiResponse({ status: 200, description: 'Прием пищи успешно убран у курса' })
+  removeMealFromCourse(@Param('id') id: string, @Param('mealId') mealId: string) {
+    return this.coursesService.removeMealFromCourse(id, mealId);
+  }
+
+  @Post(':id/teachers/:teacherId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ 
+    summary: 'Добавить преподавателя к фитнес-курсу',
+    description: 'Добавляет преподавателя к фитнес-курсу. Доступно только модераторам, администраторам и выше.'
+  })
+  @ApiParam({ name: 'id', description: 'ID курса', example: '507f1f77bcf86cd799439011' })
+  @ApiParam({ name: 'teacherId', description: 'ID преподавателя', example: '507f1f77bcf86cd799439015' })
+  @ApiResponse({ status: 200, description: 'Преподаватель успешно добавлен к курсу' })
+  @ApiResponse({ status: 400, description: 'Можно добавлять преподавателей только к фитнес-курсам' })
+  addTeacherToCourse(@Param('id') id: string, @Param('teacherId') teacherId: string) {
+    return this.coursesService.addTeacherToCourse(id, teacherId);
+  }
+
+  @Delete(':id/teachers/:teacherId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(UserRole.MODERATOR, UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ 
+    summary: 'Убрать преподавателя у фитнес-курса',
+    description: 'Убирает преподавателя у фитнес-курса. Доступно только модераторам, администраторам и выше.'
+  })
+  @ApiParam({ name: 'id', description: 'ID курса', example: '507f1f77bcf86cd799439011' })
+  @ApiParam({ name: 'teacherId', description: 'ID преподавателя', example: '507f1f77bcf86cd799439015' })
+  @ApiResponse({ status: 200, description: 'Преподаватель успешно убран у курса' })
+  removeTeacherFromCourse(@Param('id') id: string, @Param('teacherId') teacherId: string) {
+    return this.coursesService.removeTeacherFromCourse(id, teacherId);
   }
 } 

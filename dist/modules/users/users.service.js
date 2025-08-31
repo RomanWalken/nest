@@ -24,15 +24,15 @@ let UsersService = class UsersService {
     async create(createUserDto, companyId) {
         const existingUser = await this.userModel.findOne({
             email: createUserDto.email,
-            companyId: new mongoose_2.Types.ObjectId(companyId),
         });
         if (existingUser) {
-            throw new common_1.ConflictException('Пользователь с таким email уже существует в этой компании');
+            throw new common_1.ConflictException('Пользователь с таким email уже существует');
         }
-        const user = new this.userModel({
-            ...createUserDto,
-            companyId: new mongoose_2.Types.ObjectId(companyId),
-        });
+        const userData = { ...createUserDto };
+        if (companyId && mongoose_2.Types.ObjectId.isValid(companyId)) {
+            userData.companyId = new mongoose_2.Types.ObjectId(companyId);
+        }
+        const user = new this.userModel(userData);
         return user.save();
     }
     async findAll(paginationDto = {}, companyId) {

@@ -6,7 +6,7 @@ import { PaginationDto } from '@/common/types';
 export declare class UsersService {
     private userModel;
     constructor(userModel: Model<UserDocument>);
-    create(createUserDto: CreateUserDto, companyId: string): Promise<User>;
+    create(createUserDto: CreateUserDto, companyId?: string): Promise<User>;
     findAll(paginationDto?: PaginationDto, companyId?: string): Promise<{
         data: User[];
         meta: any;
