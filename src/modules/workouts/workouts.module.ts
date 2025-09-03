@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Workout, WorkoutSchema } from './schemas/workout.schema';
+import { WorkoutsService } from './workouts.service';
+import { WorkoutsController } from './workouts.controller';
 
 @Module({
   imports: [
@@ -8,7 +10,9 @@ import { Workout, WorkoutSchema } from './schemas/workout.schema';
       { name: Workout.name, schema: WorkoutSchema }
     ])
   ],
-  exports: [MongooseModule],
+  controllers: [WorkoutsController],
+  providers: [WorkoutsService],
+  exports: [WorkoutsService],
 })
 export class WorkoutsModule {}
 

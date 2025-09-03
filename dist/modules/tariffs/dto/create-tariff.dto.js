@@ -174,4 +174,66 @@ __decorate([
     (0, class_validator_1.IsObject)(),
     __metadata("design:type", Object)
 ], CreateTariffDto.prototype, "features", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'ID цены в Stripe (автоматически создается при интеграции)',
+        example: 'price_1N8xKjLv3vJZqXyZ1234567890'
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateTariffDto.prototype, "stripePriceId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'ID продукта в Stripe (автоматически создается при интеграции)',
+        example: 'prod_1N8xKjLv3vJZqXyZ1234567890'
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateTariffDto.prototype, "stripeProductId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'ID продукта в WayForPay (автоматически создается при интеграции)',
+        example: 'WFP_PRODUCT_123456'
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateTariffDto.prototype, "wayforpayProductId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Универсальный внешний ID для интеграций',
+        example: 'TARIFF_001'
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], CreateTariffDto.prototype, "externalId", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Метаданные для Stripe (ключ-значение строки)',
+        example: {
+            course_type: 'fitness',
+            difficulty: 'beginner',
+            category: 'yoga'
+        }
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsObject)(),
+    __metadata("design:type", Object)
+], CreateTariffDto.prototype, "stripeMetadata", void 0);
+__decorate([
+    (0, swagger_1.ApiPropertyOptional)({
+        description: 'Метаданные для WayForPay',
+        example: {
+            productType: 'course',
+            courseId: '507f1f77bcf86cd799439011',
+            features: ['video', 'materials', 'support']
+        }
+    }),
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsObject)(),
+    __metadata("design:type", Object)
+], CreateTariffDto.prototype, "wayforpayMetadata", void 0);
 //# sourceMappingURL=create-tariff.dto.js.map

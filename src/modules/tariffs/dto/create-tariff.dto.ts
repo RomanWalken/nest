@@ -146,4 +146,62 @@ export class CreateTariffDto {
   @IsOptional()
   @IsObject()
   features?: Record<string, any>;
+
+  // Платежные системы
+  @ApiPropertyOptional({ 
+    description: 'ID цены в Stripe (автоматически создается при интеграции)',
+    example: 'price_1N8xKjLv3vJZqXyZ1234567890'
+  })
+  @IsOptional()
+  @IsString()
+  stripePriceId?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'ID продукта в Stripe (автоматически создается при интеграции)',
+    example: 'prod_1N8xKjLv3vJZqXyZ1234567890'
+  })
+  @IsOptional()
+  @IsString()
+  stripeProductId?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'ID продукта в WayForPay (автоматически создается при интеграции)',
+    example: 'WFP_PRODUCT_123456'
+  })
+  @IsOptional()
+  @IsString()
+  wayforpayProductId?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Универсальный внешний ID для интеграций',
+    example: 'TARIFF_001'
+  })
+  @IsOptional()
+  @IsString()
+  externalId?: string;
+
+  // Метаданные для платежных систем
+  @ApiPropertyOptional({ 
+    description: 'Метаданные для Stripe (ключ-значение строки)',
+    example: {
+      course_type: 'fitness',
+      difficulty: 'beginner',
+      category: 'yoga'
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  stripeMetadata?: Record<string, string>;
+
+  @ApiPropertyOptional({ 
+    description: 'Метаданные для WayForPay',
+    example: {
+      productType: 'course',
+      courseId: '507f1f77bcf86cd799439011',
+      features: ['video', 'materials', 'support']
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  wayforpayMetadata?: Record<string, any>;
 } 

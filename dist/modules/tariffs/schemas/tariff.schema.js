@@ -72,6 +72,30 @@ __decorate([
     (0, mongoose_1.Prop)({ type: Object, default: {} }),
     __metadata("design:type", Object)
 ], Tariff.prototype, "features", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Tariff.prototype, "stripePriceId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Tariff.prototype, "stripeProductId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Tariff.prototype, "wayforpayProductId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Tariff.prototype, "externalId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: Object, default: {} }),
+    __metadata("design:type", Object)
+], Tariff.prototype, "stripeMetadata", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: Object, default: {} }),
+    __metadata("design:type", Object)
+], Tariff.prototype, "wayforpayMetadata", void 0);
 exports.Tariff = Tariff = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], Tariff);
@@ -82,4 +106,8 @@ exports.TariffSchema.index({ newPrice: 1 });
 exports.TariffSchema.index({ duration: 1 });
 exports.TariffSchema.index({ lessonIds: 1 });
 exports.TariffSchema.index({ workoutIds: 1 });
+exports.TariffSchema.index({ stripePriceId: 1 });
+exports.TariffSchema.index({ stripeProductId: 1 });
+exports.TariffSchema.index({ wayforpayProductId: 1 });
+exports.TariffSchema.index({ externalId: 1 });
 //# sourceMappingURL=tariff.schema.js.map

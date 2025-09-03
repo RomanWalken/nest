@@ -47,6 +47,26 @@ export class Tariff {
 
   @Prop({ type: Object, default: {} })
   features: Record<string, any>; // Дополнительные возможности
+
+  // Платежные системы
+  @Prop()
+  stripePriceId?: string; // ID цены в Stripe
+
+  @Prop()
+  stripeProductId?: string; // ID продукта в Stripe
+
+  @Prop()
+  wayforpayProductId?: string; // ID продукта в WayForPay
+
+  @Prop()
+  externalId?: string; // Универсальный внешний ID
+
+  // Метаданные для платежных систем
+  @Prop({ type: Object, default: {} })
+  stripeMetadata?: Record<string, string>; // Метаданные для Stripe
+
+  @Prop({ type: Object, default: {} })
+  wayforpayMetadata?: Record<string, any>; // Метаданные для WayForPay
 }
 
 export const TariffSchema = SchemaFactory.createForClass(Tariff);
@@ -57,4 +77,8 @@ TariffSchema.index({ status: 1 });
 TariffSchema.index({ newPrice: 1 });
 TariffSchema.index({ duration: 1 });
 TariffSchema.index({ lessonIds: 1 });
-TariffSchema.index({ workoutIds: 1 }); 
+TariffSchema.index({ workoutIds: 1 });
+TariffSchema.index({ stripePriceId: 1 });
+TariffSchema.index({ stripeProductId: 1 });
+TariffSchema.index({ wayforpayProductId: 1 });
+TariffSchema.index({ externalId: 1 }); 

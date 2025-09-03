@@ -56,6 +56,30 @@ __decorate([
     (0, mongoose_1.Prop)({ type: Object, default: {} }),
     __metadata("design:type", Object)
 ], Purchase.prototype, "metadata", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Purchase.prototype, "stripePaymentIntentId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Purchase.prototype, "stripeCustomerId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Purchase.prototype, "wayforpayOrderReference", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Purchase.prototype, "wayforpayTransactionId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Purchase.prototype, "wayforpayMerchantAccount", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: Object, default: {} }),
+    __metadata("design:type", Object)
+], Purchase.prototype, "paymentProviderData", void 0);
 exports.Purchase = Purchase = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], Purchase);
@@ -67,4 +91,8 @@ exports.PurchaseSchema.index({ tariffId: 1 });
 exports.PurchaseSchema.index({ paymentStatus: 1 });
 exports.PurchaseSchema.index({ accessExpiresAt: 1 });
 exports.PurchaseSchema.index({ transactionId: 1 });
+exports.PurchaseSchema.index({ stripePaymentIntentId: 1 });
+exports.PurchaseSchema.index({ stripeCustomerId: 1 });
+exports.PurchaseSchema.index({ wayforpayOrderReference: 1 });
+exports.PurchaseSchema.index({ wayforpayTransactionId: 1 });
 //# sourceMappingURL=purchase.schema.js.map

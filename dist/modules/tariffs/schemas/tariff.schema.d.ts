@@ -16,6 +16,12 @@ export declare class Tariff {
     advantages: string[];
     includesDoctor: boolean;
     features: Record<string, any>;
+    stripePriceId?: string;
+    stripeProductId?: string;
+    wayforpayProductId?: string;
+    externalId?: string;
+    stripeMetadata?: Record<string, string>;
+    wayforpayMetadata?: Record<string, any>;
 }
 export declare const TariffSchema: import("mongoose").Schema<Tariff, import("mongoose").Model<Tariff, any, any, any, Document<unknown, any, Tariff, any, {}> & Tariff & {
     _id: Types.ObjectId;

@@ -14,4 +14,10 @@ export declare class CreateTariffDto {
     advantages?: string[];
     includesDoctor?: boolean;
     features?: Record<string, any>;
+    stripePriceId?: string;
+    stripeProductId?: string;
+    wayforpayProductId?: string;
+    externalId?: string;
+    stripeMetadata?: Record<string, string>;
+    wayforpayMetadata?: Record<string, any>;
 }

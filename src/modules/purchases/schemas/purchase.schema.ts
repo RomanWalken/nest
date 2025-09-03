@@ -35,6 +35,27 @@ export class Purchase {
 
   @Prop({ type: Object, default: {} })
   metadata: Record<string, any>;
+
+  // Stripe
+  @Prop()
+  stripePaymentIntentId?: string; // ID Payment Intent в Stripe
+
+  @Prop()
+  stripeCustomerId?: string; // ID клиента в Stripe
+
+  // WayForPay
+  @Prop()
+  wayforpayOrderReference?: string; // Order Reference в WayForPay
+
+  @Prop()
+  wayforpayTransactionId?: string; // Transaction ID в WayForPay
+
+  @Prop()
+  wayforpayMerchantAccount?: string; // Merchant Account в WayForPay
+
+  // Общие данные от платежных систем
+  @Prop({ type: Object, default: {} })
+  paymentProviderData?: Record<string, any>; // Данные от платежной системы
 }
 
 export const PurchaseSchema = SchemaFactory.createForClass(Purchase);
@@ -46,4 +67,8 @@ PurchaseSchema.index({ courseId: 1 });
 PurchaseSchema.index({ tariffId: 1 });
 PurchaseSchema.index({ paymentStatus: 1 });
 PurchaseSchema.index({ accessExpiresAt: 1 });
-PurchaseSchema.index({ transactionId: 1 }); 
+PurchaseSchema.index({ transactionId: 1 });
+PurchaseSchema.index({ stripePaymentIntentId: 1 });
+PurchaseSchema.index({ stripeCustomerId: 1 });
+PurchaseSchema.index({ wayforpayOrderReference: 1 });
+PurchaseSchema.index({ wayforpayTransactionId: 1 }); 

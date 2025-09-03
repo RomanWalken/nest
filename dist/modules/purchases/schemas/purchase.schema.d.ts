@@ -12,6 +12,12 @@ export declare class Purchase {
     transactionId: string;
     accessExpiresAt: Date;
     metadata: Record<string, any>;
+    stripePaymentIntentId?: string;
+    stripeCustomerId?: string;
+    wayforpayOrderReference?: string;
+    wayforpayTransactionId?: string;
+    wayforpayMerchantAccount?: string;
+    paymentProviderData?: Record<string, any>;
 }
 export declare const PurchaseSchema: import("mongoose").Schema<Purchase, import("mongoose").Model<Purchase, any, any, any, Document<unknown, any, Purchase, any, {}> & Purchase & {
     _id: Types.ObjectId;

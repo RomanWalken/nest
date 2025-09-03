@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DifficultyLevel = exports.PaymentMethod = exports.PaymentStatus = exports.TariffStatus = exports.DietaryCategory = exports.LessonType = exports.CoursePublicationStatus = exports.CourseCategory = exports.CourseKind = exports.UserRole = void 0;
+exports.DifficultyLevel = exports.PaymentProvider = exports.PaymentMethod = exports.PaymentStatus = exports.TariffStatus = exports.DietaryCategory = exports.LessonType = exports.CoursePublicationStatus = exports.CourseCategory = exports.CourseKind = exports.UserRole = void 0;
 var UserRole;
 (function (UserRole) {
     UserRole["STUDENT"] = "student";
@@ -74,6 +74,11 @@ var PaymentMethod;
     PaymentMethod["WAYFORPAY"] = "wayforpay";
     PaymentMethod["STRIPE"] = "stripe";
 })(PaymentMethod || (exports.PaymentMethod = PaymentMethod = {}));
+var PaymentProvider;
+(function (PaymentProvider) {
+    PaymentProvider["STRIPE"] = "stripe";
+    PaymentProvider["WAYFORPAY"] = "wayforpay";
+})(PaymentProvider || (exports.PaymentProvider = PaymentProvider = {}));
 var DifficultyLevel;
 (function (DifficultyLevel) {
     DifficultyLevel["BEGINNER"] = "beginner";

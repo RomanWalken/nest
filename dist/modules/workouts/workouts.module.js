@@ -10,6 +10,8 @@ exports.WorkoutsModule = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const workout_schema_1 = require("./schemas/workout.schema");
+const workouts_service_1 = require("./workouts.service");
+const workouts_controller_1 = require("./workouts.controller");
 let WorkoutsModule = class WorkoutsModule {
 };
 exports.WorkoutsModule = WorkoutsModule;
@@ -20,7 +22,9 @@ exports.WorkoutsModule = WorkoutsModule = __decorate([
                 { name: workout_schema_1.Workout.name, schema: workout_schema_1.WorkoutSchema }
             ])
         ],
-        exports: [mongoose_1.MongooseModule],
+        controllers: [workouts_controller_1.WorkoutsController],
+        providers: [workouts_service_1.WorkoutsService],
+        exports: [workouts_service_1.WorkoutsService],
     })
 ], WorkoutsModule);
 //# sourceMappingURL=workouts.module.js.map

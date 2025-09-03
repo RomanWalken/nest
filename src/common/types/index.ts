@@ -71,6 +71,11 @@ export enum PaymentMethod {
   STRIPE = 'stripe',
 }
 
+export enum PaymentProvider {
+  STRIPE = 'stripe',
+  WAYFORPAY = 'wayforpay',
+}
+
 export enum DifficultyLevel {
   BEGINNER = 'beginner',
   INTERMEDIATE = 'intermediate',
@@ -102,4 +107,30 @@ export interface ApiError {
   code: number;
   details?: any;
   timestamp: string;
+}
+
+export interface PaymentProviderConfig {
+  stripe: {
+    publishableKey: string;
+    secretKey: string;
+    webhookSecret: string;
+  };
+  wayforpay: {
+    merchantAccount: string;
+    merchantSecretKey: string;
+    merchantDomainName: string;
+  };
+}
+
+export interface StripePaymentData {
+  paymentIntentId: string;
+  customerId?: string;
+  metadata?: Record<string, string>;
+}
+
+export interface WayForPayPaymentData {
+  orderReference: string;
+  transactionId?: string;
+  merchantAccount: string;
+  metadata?: Record<string, any>;
 } 

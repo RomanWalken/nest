@@ -18,6 +18,7 @@ import { EquipmentModule } from './modules/equipment/equipment.module';
 import { WorkoutsModule } from './modules/workouts/workouts.module';
 import { ExercisesModule } from './modules/exercises/exercises.module';
 import { DoctorsModule } from './modules/doctors/doctors.module';
+import { UserCourseSettingsModule } from './modules/user-course-settings/user-course-settings.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { DoctorsModule } from './modules/doctors/doctors.module';
     WorkoutsModule,
     ExercisesModule,
     DoctorsModule,
+    UserCourseSettingsModule,
   ],
   providers: [
     {
