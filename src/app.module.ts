@@ -19,6 +19,7 @@ import { WorkoutsModule } from './modules/workouts/workouts.module';
 import { ExercisesModule } from './modules/exercises/exercises.module';
 import { DoctorsModule } from './modules/doctors/doctors.module';
 import { UserCourseSettingsModule } from './modules/user-course-settings/user-course-settings.module';
+import { StudentProfileModule } from './modules/student-profile/student-profile.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { UserCourseSettingsModule } from './modules/user-course-settings/user-co
     ExercisesModule,
     DoctorsModule,
     UserCourseSettingsModule,
+    StudentProfileModule,
   ],
   providers: [
     {

@@ -28,6 +28,7 @@ const workouts_module_1 = require("./modules/workouts/workouts.module");
 const exercises_module_1 = require("./modules/exercises/exercises.module");
 const doctors_module_1 = require("./modules/doctors/doctors.module");
 const user_course_settings_module_1 = require("./modules/user-course-settings/user-course-settings.module");
+const student_profile_module_1 = require("./modules/student-profile/student-profile.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -59,6 +60,7 @@ exports.AppModule = AppModule = __decorate([
             exercises_module_1.ExercisesModule,
             doctors_module_1.DoctorsModule,
             user_course_settings_module_1.UserCourseSettingsModule,
+            student_profile_module_1.StudentProfileModule,
         ],
         providers: [
             {
