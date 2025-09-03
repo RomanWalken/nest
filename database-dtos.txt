@@ -1,0 +1,1538 @@
+import { IsString, IsEmail, IsOptional, IsEnum, IsBoolean, IsNumber, IsArray, IsObject, IsUrl, IsMongoId, IsPhoneNumber, Min, MaxLength, Max } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { PartialType } from '@nestjs/swagger';
+import { 
+  UserRole, 
+  CourseKind, 
+  CourseCategory, 
+  CoursePublicationStatus, 
+  LessonType, 
+  DietaryCategory, 
+  TariffStatus, 
+  PaymentStatus, 
+  PaymentMethod, 
+  DifficultyLevel 
+} from '@/common/types';
+
+// ============================================================================
+// COMMON TYPES
+// ============================================================================
+export interface PaginationDto {
+  page?: number;
+  limit?: number;
+}
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+}
+
+export interface ApiResponse<T> {
+  data: T;
+  meta?: any;
+}
+
+export interface ApiError {
+  error: string;
+  code: number;
+  details?: any;
+  timestamp: string;
+}
+
+// ============================================================================
+// USER DTOs
+// ============================================================================
+export class CreateUserDto {
+  @ApiProperty({ 
+    description: 'Email пользователя (уникальный в рамках компании)',
+    example: 'john.doe@example.com',
+    format: 'email'
+  })
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({ 
+    description: 'Пароль пользователя (минимум 8 символов)',
+    example: 'SecurePass123!',
+    minLength: 8,
+    format: 'password'
+  })
+  @IsString()
+  password: string;
+
+  @ApiProperty({ 
+    description: 'Имя пользователя',
+    example: 'John',
+    maxLength: 50
+  })
+  @IsString()
+  @MaxLength(50)
+  firstName: string;
+
+  @ApiProperty({ 
+    description: 'Фамилия пользователя',
+    example: 'Doe',
+    maxLength: 50
+  })
+  @IsString()
+  @MaxLength(50)
+  lastName: string;
+
+  @ApiPropertyOptional({ 
+    description: 'URL аватара пользователя',
+    example: 'https://example.com/avatars/john-doe.jpg',
+    format: 'uri'
+  })
+  @IsOptional()
+  @IsString()
+  @IsUrl()
+  avatar?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Номер телефона в международном формате',
+    example: '+380501234567',
+    format: 'phone'
+  })
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Роль пользователя в системе',
+    enum: UserRole,
+    example: UserRole.STUDENT,
+    default: UserRole.STUDENT
+  })
+  @IsOptional()
+  @IsEnum(UserRole)
+  role?: UserRole;
+
+  @ApiPropertyOptional({ 
+    description: 'ID компании, к которой привязан пользователь',
+    example: '507f1f77bcf86cd799439011'
+  })
+  @IsOptional()
+  @IsString()
+  @IsMongoId()
+  companyId?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Дополнительные данные профиля',
+    example: {
+      education: 'Высшее образование',
+      interests: ['спорт', 'музыка'],
+      socialLinks: { instagram: '@johndoe' }
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  profile?: Record<string, any>;
+}
+
+export class UpdateUserDto extends PartialType(CreateUserDto) {}
+
+// ============================================================================
+// COMPANY DTOs
+// ============================================================================
+export class CreateCompanyDto {
+  @ApiProperty({ 
+    description: 'Название компании',
+    example: 'Fitness Academy Pro',
+    maxLength: 100
+  })
+  @IsString()
+  @MaxLength(100)
+  name: string;
+
+  @ApiProperty({ 
+    description: 'URL-идентификатор компании (slug)',
+    example: 'fitness-academy-pro',
+    pattern: '^[a-z0-9-]+$',
+    maxLength: 50
+  })
+  @IsString()
+  @MaxLength(50)
+  slug: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Подробное описание компании',
+    example: 'Ведущая платформа для онлайн-обучения фитнесу',
+    maxLength: 1000
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  description?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'URL логотипа компании',
+    example: 'https://example.com/logos/fitness-academy-logo.png',
+    format: 'uri'
+  })
+  @IsOptional()
+  @IsString()
+  @IsUrl()
+  logo?: string;
+
+  @ApiProperty({ 
+    description: 'Домен компании для мультитенантности',
+    example: 'fitness-academy.example.com',
+    maxLength: 100
+  })
+  @IsString()
+  @MaxLength(100)
+  domain: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Настройки компании',
+    example: {
+      theme: 'dark',
+      features: ['chat', 'analytics'],
+      limits: { maxUsers: 1000, maxCourses: 100 }
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  settings?: Record<string, any>;
+
+  @ApiProperty({ 
+    description: 'ID владельца компании',
+    example: '507f1f77bcf86cd799439011'
+  })
+  @IsString()
+  @IsMongoId()
+  ownerId: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Активна ли компания',
+    example: true,
+    default: true
+  })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+}
+
+export class UpdateCompanyDto extends PartialType(CreateCompanyDto) {}
+
+// ============================================================================
+// COURSE DTOs
+// ============================================================================
+export class CreateCourseDto {
+  @ApiProperty({ 
+    description: 'Название курса',
+    example: 'Основы фитнеса для начинающих',
+    maxLength: 200
+  })
+  @IsString()
+  @MaxLength(200)
+  title: string;
+
+  @ApiProperty({ 
+    description: 'URL-идентификатор курса (slug)',
+    example: 'osnovy-fitnesa-dlya-nachinayushchih',
+    pattern: '^[a-z0-9-]+$'
+  })
+  @IsString()
+  slug: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Подробное описание курса',
+    example: 'Комплексный курс по фитнесу для начинающих',
+    maxLength: 2000
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  description?: string;
+
+  @ApiProperty({ 
+    description: 'Вид курса',
+    enum: CourseKind,
+    example: CourseKind.FITNESS
+  })
+  @IsEnum(CourseKind)
+  kind: CourseKind;
+
+  @ApiProperty({ 
+    description: 'Категория курса',
+    enum: CourseCategory,
+    example: CourseCategory.FITNESS_TRAINING
+  })
+  @IsEnum(CourseCategory)
+  category: CourseCategory;
+
+  @ApiPropertyOptional({ 
+    description: 'URL превью курса',
+    example: 'https://uploadthings.io/images/course-preview.jpg',
+    format: 'uri'
+  })
+  @IsOptional()
+  @IsString()
+  @IsUrl()
+  thumbnail?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Продолжительность курса в минутах',
+    example: 1200,
+    minimum: 0
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  duration?: number;
+
+  @ApiPropertyOptional({ 
+    description: 'Уровень сложности курса',
+    enum: DifficultyLevel,
+    example: DifficultyLevel.BEGINNER,
+    default: DifficultyLevel.BEGINNER
+  })
+  @IsOptional()
+  @IsEnum(DifficultyLevel)
+  difficulty?: DifficultyLevel;
+
+  @ApiPropertyOptional({ 
+    description: 'Статус публикации курса',
+    enum: CoursePublicationStatus,
+    example: CoursePublicationStatus.DRAFT,
+    default: CoursePublicationStatus.DRAFT
+  })
+  @IsOptional()
+  @IsEnum(CoursePublicationStatus)
+  publicationStatus?: CoursePublicationStatus;
+
+  @ApiPropertyOptional({ 
+    description: 'Является ли курс рекомендуемым',
+    example: false,
+    default: false
+  })
+  @IsOptional()
+  @IsBoolean()
+  isFeatured?: boolean;
+
+  @ApiPropertyOptional({ 
+    description: 'Является ли курс платным',
+    example: true,
+    default: false
+  })
+  @IsOptional()
+  @IsBoolean()
+  isPaid?: boolean;
+
+  @ApiProperty({ 
+    description: 'ID компании, к которой относится курс',
+    example: '507f1f77bcf86cd799439011'
+  })
+  @IsString()
+  @IsMongoId()
+  companyId: string;
+
+  @ApiProperty({ 
+    description: 'ID автора курса',
+    example: '507f1f77bcf86cd799439012'
+  })
+  @IsString()
+  @IsMongoId()
+  authorId: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Теги курса',
+    example: ['фитнес', 'для начинающих', 'здоровье'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'Дополнительные метаданные курса',
+    example: {
+      targetAudience: 'начинающие',
+      prerequisites: [],
+      learningObjectives: ['Понимание основ фитнеса', 'Базовые упражнения']
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  metadata?: Record<string, any>;
+
+  // Специфичные для фитнес-курсов поля
+  @ApiPropertyOptional({ 
+    description: 'ID приемов пищи (только для фитнес-курсов)',
+    example: ['507f1f77bcf86cd799439013'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  meals?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'ID преподавателей (только для фитнес-курсов)',
+    example: ['507f1f77bcf86cd799439014'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  teachers?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'ID тренировок (только для фитнес-курсов)',
+    example: ['507f1f77bcf86cd799439015'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  workouts?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'Будет ли у курса план питания',
+    example: true,
+    default: false
+  })
+  @IsOptional()
+  @IsBoolean()
+  hasMeals?: boolean;
+
+  @ApiPropertyOptional({ 
+    description: 'Будет ли у курса доктор',
+    example: false,
+    default: false
+  })
+  @IsOptional()
+  @IsBoolean()
+  hasDoctor?: boolean;
+
+  // Специфичные для обычных курсов поля
+  @ApiPropertyOptional({ 
+    description: 'ID модулей (только для обычных курсов)',
+    example: ['507f1f77bcf86cd799439016'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  modules?: string[];
+}
+
+export class UpdateCourseDto extends PartialType(CreateCourseDto) {}
+
+// ============================================================================
+// MODULE DTOs
+// ============================================================================
+export class CreateModuleDto {
+  @ApiProperty({ 
+    description: 'Название модуля',
+    example: 'Введение в фитнес',
+    maxLength: 200
+  })
+  @IsString()
+  @MaxLength(200)
+  title: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Описание модуля',
+    example: 'Базовые принципы фитнеса и здорового образа жизни',
+    maxLength: 1000
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  description?: string;
+
+  @ApiProperty({ 
+    description: 'Порядковый номер модуля в курсе',
+    example: 1,
+    minimum: 1
+  })
+  @IsNumber()
+  @Min(1)
+  order: number;
+
+  @ApiPropertyOptional({ 
+    description: 'Является ли модуль бесплатным',
+    example: false,
+    default: false
+  })
+  @IsOptional()
+  @IsBoolean()
+  isFree?: boolean;
+
+  @ApiProperty({ 
+    description: 'ID курса, к которому относится модуль',
+    example: '507f1f77bcf86cd799439011'
+  })
+  @IsString()
+  courseId: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Дополнительные метаданные модуля',
+    example: {
+      estimatedDuration: 120,
+      difficulty: 'beginner',
+      prerequisites: [],
+      learningObjectives: ['Понимание основ фитнеса', 'Базовые упражнения']
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  metadata?: Record<string, any>;
+}
+
+export class UpdateModuleDto extends PartialType(CreateModuleDto) {}
+
+// ============================================================================
+// LESSON DTOs
+// ============================================================================
+export class CreateLessonDto {
+  @ApiProperty({ 
+    description: 'Название урока',
+    example: 'Базовые упражнения для начинающих',
+    maxLength: 200
+  })
+  @IsString()
+  @MaxLength(200)
+  title: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Описание урока',
+    example: 'В этом уроке вы изучите основные упражнения',
+    maxLength: 1000
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  description?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Текстовое содержимое урока',
+    example: 'Добро пожаловать в урок по базовым упражнениям...',
+    maxLength: 10000
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(10000)
+  content?: string;
+
+  @ApiProperty({ 
+    description: 'Тип урока',
+    enum: LessonType,
+    example: LessonType.VIDEO
+  })
+  @IsEnum(LessonType)
+  type: LessonType;
+
+  @ApiPropertyOptional({ 
+    description: 'URL видео урока (только для видео уроков)',
+    example: 'https://bunny.net/video/lesson-basic-exercises.mp4',
+    format: 'uri'
+  })
+  @IsOptional()
+  @IsString()
+  @IsUrl()
+  videoUrl?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Продолжительность урока в минутах',
+    example: 25,
+    minimum: 0
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  duration?: number;
+
+  @ApiProperty({ 
+    description: 'Порядковый номер урока в модуле',
+    example: 1,
+    minimum: 1
+  })
+  @IsNumber()
+  @Min(1)
+  order: number;
+
+  @ApiPropertyOptional({ 
+    description: 'Является ли урок бесплатным',
+    example: false,
+    default: false
+  })
+  @IsOptional()
+  @IsBoolean()
+  isFree?: boolean;
+
+  @ApiProperty({ 
+    description: 'ID модуля, к которому относится урок',
+    example: '507f1f77bcf86cd799439011'
+  })
+  @IsString()
+  @IsMongoId()
+  moduleId: string;
+
+  @ApiPropertyOptional({ 
+    description: 'ID тарифов, к которым привязан урок',
+    example: ['507f1f77bcf86cd799439012'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  tariffs?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'Прикрепленные файлы',
+    example: ['https://uploadthings.io/files/lesson-materials.pdf'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  attachments?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'Дополнительные метаданные урока',
+    example: {
+      learningObjectives: ['Изучить базовые упражнения', 'Понять технику выполнения'],
+      prerequisites: [],
+      estimatedTime: 25
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  metadata?: Record<string, any>;
+
+  // Специфичные поля для разных типов уроков
+  @ApiPropertyOptional({ 
+    description: 'Данные для опросов (только для уроков типа QUIZ)',
+    example: {
+      questions: [
+        {
+          question: 'Какое упражнение лучше всего подходит для начинающих?',
+          options: ['Приседания', 'Становая тяга', 'Жим лежа'],
+          correctAnswer: 0
+        }
+      ]
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  quizData?: Record<string, any>;
+
+  @ApiPropertyOptional({ 
+    description: 'Данные для презентаций (только для уроков типа PRESENTATION)',
+    example: {
+      slides: [
+        { title: 'Слайд 1', content: 'Содержание слайда 1' },
+        { title: 'Слайд 2', content: 'Содержание слайда 2' }
+      ],
+      transitionTime: 5000
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  presentationData?: Record<string, any>;
+}
+
+export class UpdateLessonDto extends PartialType(CreateLessonDto) {}
+
+// ============================================================================
+// TARIFF DTOs
+// ============================================================================
+export class CreateTariffDto {
+  @ApiProperty({ 
+    description: 'Название тарифа',
+    example: 'Базовый доступ на 30 дней',
+    maxLength: 100
+  })
+  @IsString()
+  @MaxLength(100)
+  name: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Подробное описание тарифа',
+    example: 'Доступ ко всем базовым урокам курса на 30 дней',
+    maxLength: 500
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  description?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'URL изображения тарифа',
+    example: 'https://uploadthings.io/images/basic-tariff.jpg',
+    format: 'uri'
+  })
+  @IsOptional()
+  @IsString()
+  @IsUrl()
+  image?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Старая цена тарифа (для отображения скидки)',
+    example: 49.99,
+    minimum: 0,
+    maximum: 9999.99
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(9999.99)
+  oldPrice?: number;
+
+  @ApiProperty({ 
+    description: 'Новая цена тарифа (основная цена для оплаты)',
+    example: 29.99,
+    minimum: 0,
+    maximum: 9999.99
+  })
+  @IsNumber()
+  @Min(0)
+  @Max(9999.99)
+  newPrice: number;
+
+  @ApiPropertyOptional({ 
+    description: 'Валюта тарифа',
+    example: 'USD',
+    default: 'USD'
+  })
+  @IsOptional()
+  @IsString()
+  currency?: string;
+
+  @ApiProperty({ 
+    description: 'Длительность тарифа в днях (0 = бессрочный доступ)',
+    example: 30,
+    minimum: 0
+  })
+  @IsNumber()
+  @Min(0)
+  duration: number;
+
+  @ApiPropertyOptional({ 
+    description: 'Статус тарифа',
+    enum: TariffStatus,
+    example: TariffStatus.ACTIVE,
+    default: TariffStatus.ACTIVE
+  })
+  @IsOptional()
+  @IsEnum(TariffStatus)
+  status?: TariffStatus;
+
+  @ApiProperty({ 
+    description: 'ID курса, к которому относится тариф',
+    example: '507f1f77bcf86cd799439011'
+  })
+  @IsString()
+  @IsMongoId()
+  courseId: string;
+
+  @ApiPropertyOptional({ 
+    description: 'ID уроков, включенных в тариф (для обычных курсов)',
+    example: ['507f1f77bcf86cd799439012'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  lessonIds?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'ID тренировок, включенных в тариф (для фитнес-курсов)',
+    example: ['507f1f77bcf86cd799439013'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  workoutIds?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'Преимущества тарифа',
+    example: ['Доступ к чату поддержки', 'Сертификат по окончании'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  advantages?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'Включает ли тариф доктора',
+    example: false,
+    default: false
+  })
+  @IsOptional()
+  @IsBoolean()
+  includesDoctor?: boolean;
+
+  @ApiPropertyOptional({ 
+    description: 'Дополнительные возможности тарифа',
+    example: {
+      maxUsers: 1,
+      prioritySupport: false,
+      offlineAccess: true
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  features?: Record<string, any>;
+}
+
+export class UpdateTariffDto extends PartialType(CreateTariffDto) {}
+
+// ============================================================================
+// MEAL DTOs
+// ============================================================================
+export class CreateMealDto {
+  @ApiProperty({ 
+    description: 'Название плана питания',
+    example: 'Завтрак для похудения',
+    maxLength: 200
+  })
+  @IsString()
+  @MaxLength(200)
+  title: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Описание плана питания',
+    example: 'Сбалансированный завтрак с высоким содержанием белка',
+    maxLength: 1000
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  description?: string;
+
+  @ApiProperty({ 
+    description: 'Калорийность блюда',
+    example: 350,
+    minimum: 0
+  })
+  @IsNumber()
+  @Min(0)
+  calories: number;
+
+  @ApiProperty({ 
+    description: 'Содержание белков в граммах',
+    example: 25,
+    minimum: 0
+  })
+  @IsNumber()
+  @Min(0)
+  proteins: number;
+
+  @ApiProperty({ 
+    description: 'Содержание жиров в граммах',
+    example: 12,
+    minimum: 0
+  })
+  @IsNumber()
+  @Min(0)
+  fats: number;
+
+  @ApiProperty({ 
+    description: 'Содержание углеводов в граммах',
+    example: 45,
+    minimum: 0
+  })
+  @IsNumber()
+  @Min(0)
+  carbohydrates: number;
+
+  @ApiPropertyOptional({ 
+    description: 'URL изображения блюда',
+    example: 'https://uploadthings.io/images/breakfast.jpg',
+    format: 'uri'
+  })
+  @IsOptional()
+  @IsString()
+  @IsUrl()
+  image?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Рецепт приготовления',
+    example: '1. Смешать ингредиенты...',
+    maxLength: 2000
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  recipe?: string;
+
+  @ApiProperty({ 
+    description: 'Категория питания',
+    enum: DietaryCategory,
+    example: DietaryCategory.HIGH_PROTEIN
+  })
+  @IsEnum(DietaryCategory)
+  dietaryCategory: DietaryCategory;
+
+  @ApiProperty({ 
+    description: 'ID курса, к которому относится план питания',
+    example: '507f1f77bcf86cd799439011'
+  })
+  @IsString()
+  @IsMongoId()
+  courseId: string;
+
+  @ApiPropertyOptional({ 
+    description: 'ID тарифов, к которым привязан план питания',
+    example: ['507f1f77bcf86cd799439012'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  tariffs?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'Список ингредиентов',
+    example: ['яйца', 'овсянка', 'банан', 'мед'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  ingredients?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'Дополнительные метаданные',
+    example: {
+      cookingTime: 15,
+      difficulty: 'easy',
+      servings: 1
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  metadata?: Record<string, any>;
+
+  // Пользовательские настройки
+  @ApiPropertyOptional({ 
+    description: 'ID пользователя, для которого настроен план питания',
+    example: '507f1f77bcf86cd799439013'
+  })
+  @IsOptional()
+  @IsString()
+  @IsMongoId()
+  customUserId?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Является ли план питания пользовательским',
+    example: false,
+    default: false
+  })
+  @IsOptional()
+  @IsBoolean()
+  isCustom?: boolean;
+}
+
+export class UpdateMealDto extends PartialType(CreateMealDto) {}
+
+// ============================================================================
+// WORKOUT DTOs
+// ============================================================================
+export class CreateWorkoutDto {
+  @ApiProperty({ 
+    description: 'Название тренировки',
+    example: 'Кардио тренировка для начинающих',
+    maxLength: 200
+  })
+  @IsString()
+  @MaxLength(200)
+  title: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Описание тренировки',
+    example: 'Интенсивная кардио тренировка для сжигания жира',
+    maxLength: 1000
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  description?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Продолжительность тренировки в минутах',
+    example: 45,
+    minimum: 0
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  duration?: number;
+
+  @ApiProperty({ 
+    description: 'Порядковый номер тренировки',
+    example: 1,
+    minimum: 1
+  })
+  @IsNumber()
+  @Min(1)
+  order: number;
+
+  @ApiPropertyOptional({ 
+    description: 'Является ли тренировка бесплатной',
+    example: false,
+    default: false
+  })
+  @IsOptional()
+  @IsBoolean()
+  isFree?: boolean;
+
+  @ApiProperty({ 
+    description: 'ID курса, к которому относится тренировка',
+    example: '507f1f77bcf86cd799439011'
+  })
+  @IsString()
+  @IsMongoId()
+  courseId: string;
+
+  @ApiPropertyOptional({ 
+    description: 'ID тарифов, к которым привязана тренировка',
+    example: ['507f1f77bcf86cd799439012'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  tariffs?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'ID упражнений в тренировке',
+    example: ['507f1f77bcf86cd799439013'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  exercises?: string[];
+
+  // Расписание
+  @ApiProperty({ 
+    description: 'Месяц (1-12)',
+    example: 1,
+    minimum: 1,
+    maximum: 12
+  })
+  @IsNumber()
+  @Min(1)
+  @Max(12)
+  month: number;
+
+  @ApiProperty({ 
+    description: 'Неделя в месяце (1-5)',
+    example: 1,
+    minimum: 1,
+    maximum: 5
+  })
+  @IsNumber()
+  @Min(1)
+  @Max(5)
+  week: number;
+
+  @ApiProperty({ 
+    description: 'День недели (1-7)',
+    example: 1,
+    minimum: 1,
+    maximum: 7
+  })
+  @IsNumber()
+  @Min(1)
+  @Max(7)
+  day: number;
+
+  @ApiPropertyOptional({ 
+    description: 'Дополнительные метаданные',
+    example: {
+      intensity: 'medium',
+      targetMuscles: ['ноги', 'сердце'],
+      equipment: ['гантели', 'коврик']
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  metadata?: Record<string, any>;
+
+  // Пользовательские настройки
+  @ApiPropertyOptional({ 
+    description: 'ID пользователя, для которого настроена тренировка',
+    example: '507f1f77bcf86cd799439014'
+  })
+  @IsOptional()
+  @IsString()
+  @IsMongoId()
+  customUserId?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Является ли тренировка пользовательской',
+    example: false,
+    default: false
+  })
+  @IsOptional()
+  @IsBoolean()
+  isCustom?: boolean;
+}
+
+export class UpdateWorkoutDto extends PartialType(CreateWorkoutDto) {}
+
+// ============================================================================
+// EXERCISE DTOs
+// ============================================================================
+export class CreateExerciseDto {
+  @ApiProperty({ 
+    description: 'Название упражнения',
+    example: 'Приседания с собственным весом',
+    maxLength: 200
+  })
+  @IsString()
+  @MaxLength(200)
+  title: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Описание упражнения',
+    example: 'Базовое упражнение для развития мышц ног',
+    maxLength: 1000
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  description?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'URL видео упражнения',
+    example: 'https://bunny.net/video/squats.mp4',
+    format: 'uri'
+  })
+  @IsOptional()
+  @IsString()
+  @IsUrl()
+  videoUrl?: string;
+
+  @ApiProperty({ 
+    description: 'Количество повторений',
+    example: 15,
+    minimum: 1
+  })
+  @IsNumber()
+  @Min(1)
+  repetitions: number;
+
+  @ApiPropertyOptional({ 
+    description: 'Подробное объяснение выполнения',
+    example: 'Встаньте прямо, ноги на ширине плеч...',
+    maxLength: 2000
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  explanation?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'ID необходимого оборудования',
+    example: ['507f1f77bcf86cd799439011'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsMongoId({ each: true })
+  equipment?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'Мускулы, над которыми ведется работа',
+    example: ['квадрицепсы', 'ягодичные мышцы', 'икроножные мышцы'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  targetMuscles?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'Продолжительность упражнения в секундах',
+    example: 30,
+    minimum: 0
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  duration?: number;
+
+  @ApiPropertyOptional({ 
+    description: 'Количество подходов',
+    example: 3,
+    minimum: 1,
+    default: 1
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(1)
+  sets?: number;
+
+  @ApiPropertyOptional({ 
+    description: 'Время отдыха между подходами в секундах',
+    example: 60,
+    minimum: 0,
+    default: 0
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  restTime?: number;
+
+  @ApiPropertyOptional({ 
+    description: 'Дополнительные метаданные',
+    example: {
+      difficulty: 'beginner',
+      caloriesBurn: 50,
+      tips: ['Держите спину прямой', 'Не отрывайте пятки от пола']
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  metadata?: Record<string, any>;
+
+  // Пользовательские настройки
+  @ApiPropertyOptional({ 
+    description: 'ID пользователя, для которого настроено упражнение',
+    example: '507f1f77bcf86cd799439012'
+  })
+  @IsOptional()
+  @IsString()
+  @IsMongoId()
+  customUserId?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Является ли упражнение пользовательским',
+    example: false,
+    default: false
+  })
+  @IsOptional()
+  @IsBoolean()
+  isCustom?: boolean;
+}
+
+export class UpdateExerciseDto extends PartialType(CreateExerciseDto) {}
+
+// ============================================================================
+// EQUIPMENT DTOs
+// ============================================================================
+export class CreateEquipmentDto {
+  @ApiProperty({ 
+    description: 'Название инвентаря/оборудования',
+    example: 'Гантели 5 кг',
+    maxLength: 100
+  })
+  @IsString()
+  @MaxLength(100)
+  name: string;
+
+  @ApiPropertyOptional({ 
+    description: 'URL иконки инвентаря',
+    example: 'https://uploadthings.io/icons/dumbbell.svg',
+    format: 'uri'
+  })
+  @IsOptional()
+  @IsString()
+  @IsUrl()
+  icon?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Описание инвентаря',
+    example: 'Универсальные гантели для домашних тренировок',
+    maxLength: 500
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  description?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Активен ли инвентарь',
+    example: true,
+    default: true
+  })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+}
+
+export class UpdateEquipmentDto extends PartialType(CreateEquipmentDto) {}
+
+// ============================================================================
+// TEACHER DTOs
+// ============================================================================
+export class CreateTeacherDto {
+  @ApiProperty({ 
+    description: 'Email преподавателя (уникальный)',
+    example: 'teacher@example.com',
+    format: 'email'
+  })
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({ 
+    description: 'Пароль преподавателя (минимум 8 символов)',
+    example: 'SecurePass123!',
+    minLength: 8,
+    format: 'password'
+  })
+  @IsString()
+  password: string;
+
+  @ApiProperty({ 
+    description: 'Имя преподавателя',
+    example: 'Анна',
+    maxLength: 50
+  })
+  @IsString()
+  @MaxLength(50)
+  firstName: string;
+
+  @ApiProperty({ 
+    description: 'Фамилия преподавателя',
+    example: 'Петрова',
+    maxLength: 50
+  })
+  @IsString()
+  @MaxLength(50)
+  lastName: string;
+
+  @ApiPropertyOptional({ 
+    description: 'URL аватара преподавателя',
+    example: 'https://example.com/avatars/anna-petrova.jpg',
+    format: 'uri'
+  })
+  @IsOptional()
+  @IsString()
+  @IsUrl()
+  avatar?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Номер телефона в международном формате',
+    example: '+380501234567',
+    format: 'phone'
+  })
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @ApiProperty({ 
+    description: 'Специализация преподавателя',
+    example: 'Фитнес-тренер',
+    maxLength: 100
+  })
+  @IsString()
+  @MaxLength(100)
+  specialization: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Навыки преподавателя',
+    example: ['персональные тренировки', 'групповые занятия', 'йога'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  skills?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'Сертификаты преподавателя',
+    example: ['сертификат фитнес-тренера', 'сертификат инструктора по йоге'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  certificates?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'Опыт работы в годах',
+    example: 5,
+    minimum: 0
+  })
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  experience?: number;
+
+  @ApiPropertyOptional({ 
+    description: 'Биография преподавателя',
+    example: 'Опытный фитнес-тренер с 5-летним стажем работы',
+    maxLength: 1000
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(1000)
+  bio?: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Языки, на которых преподает',
+    example: ['русский', 'английский'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  languages?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'Расписание работы преподавателя',
+    example: {
+      monday: { start: '09:00', end: '18:00' },
+      tuesday: { start: '09:00', end: '18:00' }
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  schedule?: Record<string, any>;
+
+  @ApiPropertyOptional({ 
+    description: 'Дополнительные данные профиля',
+    example: {
+      education: 'Киевский национальный университет',
+      achievements: ['Победитель конкурса "Лучший тренер года 2023"']
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  profile?: Record<string, any>;
+}
+
+export class UpdateTeacherDto extends PartialType(CreateTeacherDto) {}
+
+// ============================================================================
+// DOCTOR DTOs
+// ============================================================================
+export class CreateDoctorDto {
+  @ApiProperty({ 
+    description: 'ID пользователя',
+    example: '507f1f77bcf86cd799439011'
+  })
+  @IsString()
+  @IsMongoId()
+  userId: string;
+
+  @ApiProperty({ 
+    description: 'ID курса',
+    example: '507f1f77bcf86cd799439012'
+  })
+  @IsString()
+  @IsMongoId()
+  courseId: string;
+
+  @ApiPropertyOptional({ 
+    description: 'Файлы, загруженные пользователем',
+    example: ['https://uploadthings.io/files/medical-report.pdf'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  userFiles?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'Файлы, загруженные представителем курса',
+    example: ['https://uploadthings.io/files/doctor-response.pdf'],
+    type: [String]
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  courseFiles?: string[];
+
+  @ApiPropertyOptional({ 
+    description: 'Активен ли доктор',
+    example: true,
+    default: true
+  })
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+
+  @ApiPropertyOptional({ 
+    description: 'Дополнительные метаданные',
+    example: {
+      consultationType: 'online',
+      speciality: 'sports_medicine',
+      notes: 'Специалист по спортивной медицине'
+    }
+  })
+  @IsOptional()
+  @IsObject()
+  metadata?: Record<string, any>;
+}
+
+export class UpdateDoctorDto extends PartialType(CreateDoctorDto) {}
+
+// ============================================================================
+// EXPORT ALL DTOs
+// ============================================================================
+export const DTOs = {
+  // User DTOs
+  CreateUserDto,
+  UpdateUserDto,
+  
+  // Company DTOs
+  CreateCompanyDto,
+  UpdateCompanyDto,
+  
+  // Course DTOs
+  CreateCourseDto,
+  UpdateCourseDto,
+  
+  // Module DTOs
+  CreateModuleDto,
+  UpdateModuleDto,
+  
+  // Lesson DTOs
+  CreateLessonDto,
+  UpdateLessonDto,
+  
+  // Tariff DTOs
+  CreateTariffDto,
+  UpdateTariffDto,
+  
+  // Meal DTOs
+  CreateMealDto,
+  UpdateMealDto,
+  
+  // Workout DTOs
+  CreateWorkoutDto,
+  UpdateWorkoutDto,
+  
+  // Exercise DTOs
+  CreateExerciseDto,
+  UpdateExerciseDto,
+  
+  // Equipment DTOs
+  CreateEquipmentDto,
+  UpdateEquipmentDto,
+  
+  // Teacher DTOs
+  CreateTeacherDto,
+  UpdateTeacherDto,
+  
+  // Doctor DTOs
+  CreateDoctorDto,
+  UpdateDoctorDto,
+};
+
+// ============================================================================
+// EXPORT COMMON TYPES
+// ============================================================================
+export const CommonTypes = {
+  PaginationDto,
+  PaginatedResponse,
+  ApiResponse,
+  ApiError,
+};

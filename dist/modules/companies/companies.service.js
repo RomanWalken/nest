@@ -22,15 +22,6 @@ let CompaniesService = class CompaniesService {
         this.companyModel = companyModel;
     }
     async create(createCompanyDto, ownerId) {
-        const existingCompany = await this.companyModel.findOne({
-            $or: [
-                { slug: createCompanyDto.slug },
-                { domain: createCompanyDto.domain }
-            ]
-        });
-        if (existingCompany) {
-            throw new common_1.ConflictException('Компания с таким slug или domain уже существует');
-        }
         const company = new this.companyModel({
             ...createCompanyDto,
             ownerId: new mongoose_2.Types.ObjectId(ownerId),
@@ -65,6 +56,9 @@ let CompaniesService = class CompaniesService {
         };
     }
     async findOne(id) {
+        if (!mongoose_2.Types.ObjectId.isValid(id)) {
+            throw new common_1.BadRequestException(`Невалидный ID компании: ${id}. ID должен быть 24-символьной hex строкой.`);
+        }
         const company = await this.companyModel
             .findById(id)
             .populate('ownerId', 'firstName lastName email')
@@ -95,6 +89,9 @@ let CompaniesService = class CompaniesService {
         return company;
     }
     async update(id, updateCompanyDto) {
+        if (!mongoose_2.Types.ObjectId.isValid(id)) {
+            throw new common_1.BadRequestException(`Невалидный ID компании: ${id}. ID должен быть 24-символьной hex строкой.`);
+        }
         const company = await this.companyModel
             .findByIdAndUpdate(id, updateCompanyDto, { new: true })
             .populate('ownerId', 'firstName lastName email')
@@ -105,12 +102,18 @@ let CompaniesService = class CompaniesService {
         return company;
     }
     async remove(id) {
+        if (!mongoose_2.Types.ObjectId.isValid(id)) {
+            throw new common_1.BadRequestException(`Невалидный ID компании: ${id}. ID должен быть 24-символьной hex строкой.`);
+        }
         const result = await this.companyModel.findByIdAndDelete(id).exec();
         if (!result) {
             throw new common_1.NotFoundException('Компания не найдена');
         }
     }
     async isOwner(companyId, userId) {
+        if (!mongoose_2.Types.ObjectId.isValid(companyId)) {
+            throw new common_1.BadRequestException(`Невалидный ID компании: ${companyId}. ID должен быть 24-символьной hex строкой.`);
+        }
         const company = await this.companyModel.findById(companyId).exec();
         return company?.ownerId.toString() === userId;
     }

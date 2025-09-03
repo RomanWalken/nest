@@ -8,12 +8,14 @@ export declare class TeachersService {
     private teacherModel;
     constructor(teacherModel: Model<TeacherDocument>);
     create(createTeacherDto: CreateTeacherDto): Promise<Teacher>;
-    findAll(query: QueryTeacherDto, userCompanyId?: string): Promise<PaginatedResponse<Teacher>>;
-    findOne(id: string, userCompanyId?: string): Promise<Teacher>;
-    update(id: string, updateTeacherDto: UpdateTeacherDto, userCompanyId?: string): Promise<Teacher>;
-    remove(id: string, userCompanyId?: string): Promise<void>;
-    findByCompany(companyId: string): Promise<Teacher[]>;
-    findBySpecialization(specialization: string, companyId?: string): Promise<Teacher[]>;
-    addCourse(teacherId: string, courseId: string, userCompanyId?: string): Promise<Teacher>;
-    removeCourse(teacherId: string, courseId: string, userCompanyId?: string): Promise<Teacher>;
+    findAll(query: QueryTeacherDto): Promise<PaginatedResponse<Teacher>>;
+    findOne(id: string): Promise<Teacher>;
+    findByEmail(email: string): Promise<Teacher | null>;
+    update(id: string, updateTeacherDto: UpdateTeacherDto): Promise<Teacher>;
+    remove(id: string): Promise<void>;
+    addCourse(teacherId: string, courseId: string): Promise<Teacher>;
+    removeCourse(teacherId: string, courseId: string): Promise<Teacher>;
+    updatePassword(id: string, newPassword: string): Promise<void>;
+    verifyEmail(id: string): Promise<void>;
+    updateLastLogin(id: string): Promise<void>;
 }

@@ -1,0 +1,805 @@
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
+import { 
+  UserRole, 
+  CourseKind, 
+  CourseCategory, 
+  CoursePublicationStatus, 
+  LessonType, 
+  DietaryCategory, 
+  TariffStatus, 
+  PaymentStatus, 
+  PaymentMethod, 
+  DifficultyLevel 
+} from '@/common/types';
+
+// ============================================================================
+// USER SCHEMA
+// ============================================================================
+export type UserDocument = User & Document;
+
+@Schema({ timestamps: true })
+export class User {
+  @Prop({ required: true, unique: true })
+  email: string;
+
+  @Prop({ required: true })
+  password: string;
+
+  @Prop({ required: true })
+  firstName: string;
+
+  @Prop({ required: true })
+  lastName: string;
+
+  @Prop()
+  avatar: string;
+
+  @Prop()
+  phone: string;
+
+  @Prop({ type: String, enum: UserRole, default: UserRole.STUDENT })
+  role: UserRole;
+
+  @Prop({ type: Types.ObjectId, ref: 'Company' })
+  companyId: Types.ObjectId;
+
+  @Prop({ default: true })
+  isActive: boolean;
+
+  @Prop({ default: false })
+  emailVerified: boolean;
+
+  @Prop({ type: [String], default: [] })
+  authProviders: string[];
+
+  @Prop()
+  lastLogin: Date;
+
+  @Prop({ type: Object, default: {} })
+  profile: Record<string, any>;
+}
+
+export const UserSchema = SchemaFactory.createForClass(User);
+
+// Индексы
+UserSchema.index({ email: 1 });
+UserSchema.index({ companyId: 1 });
+UserSchema.index({ role: 1 });
+UserSchema.index({ isActive: 1 });
+
+// ============================================================================
+// COMPANY SCHEMA
+// ============================================================================
+export type CompanyDocument = Company & Document;
+
+@Schema({ timestamps: true })
+export class Company {
+  @Prop({ required: true, unique: true })
+  name: string;
+
+  @Prop({ required: true, unique: true })
+  slug: string;
+
+  @Prop()
+  description: string;
+
+  @Prop()
+  logo: string;
+
+  @Prop({ unique: true })
+  domain: string;
+
+  @Prop({ type: Object, default: {} })
+  settings: Record<string, any>;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  ownerId: Types.ObjectId;
+
+  @Prop({ default: true })
+  isActive: boolean;
+}
+
+export const CompanySchema = SchemaFactory.createForClass(Company);
+
+// Индексы
+CompanySchema.index({ name: 1 });
+CompanySchema.index({ slug: 1 });
+CompanySchema.index({ domain: 1 });
+CompanySchema.index({ ownerId: 1 });
+CompanySchema.index({ isActive: 1 });
+
+// ============================================================================
+// COURSE SCHEMA
+// ============================================================================
+export type CourseDocument = Course & Document;
+
+@Schema({ timestamps: true })
+export class Course {
+  @Prop({ required: true })
+  title: string;
+
+  @Prop({ required: true })
+  slug: string;
+
+  @Prop()
+  description: string;
+
+  @Prop()
+  thumbnail: string;
+
+  @Prop({ default: 0 })
+  duration: number; // в минутах
+
+  @Prop({ type: String, enum: DifficultyLevel, default: DifficultyLevel.BEGINNER })
+  difficulty: DifficultyLevel;
+
+  @Prop({ type: String, enum: CoursePublicationStatus, default: CoursePublicationStatus.DRAFT })
+  publicationStatus: CoursePublicationStatus;
+
+  @Prop({ default: false })
+  isFeatured: boolean;
+
+  @Prop({ default: false })
+  isPaid: boolean; // Платный или бесплатный курс
+
+  @Prop({ type: String, enum: CourseKind, required: true })
+  kind: CourseKind;
+
+  @Prop({ type: String, enum: CourseCategory, required: true })
+  category: CourseCategory;
+
+  @Prop({ type: Types.ObjectId, ref: 'Company', required: true })
+  companyId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  authorId: Types.ObjectId;
+
+  @Prop({ type: [String], default: [] })
+  tags: string[];
+
+  @Prop({ type: Object, default: {} })
+  metadata: Record<string, any>;
+
+  // Специфичные для фитнес-курсов поля
+  @Prop({ type: [Types.ObjectId], ref: 'Meal', default: [] })
+  meals: Types.ObjectId[];
+
+  @Prop({ type: [Types.ObjectId], ref: 'Teacher', default: [] })
+  teachers: Types.ObjectId[];
+
+  @Prop({ type: [Types.ObjectId], ref: 'Workout', default: [] })
+  workouts: Types.ObjectId[];
+
+  @Prop({ default: false })
+  hasMeals: boolean; // Будет ли у курса meals
+
+  @Prop({ default: false })
+  hasDoctor: boolean; // Будет ли у курса доктор
+
+  // Специфичные для обычных курсов поля
+  @Prop({ type: [Types.ObjectId], ref: 'Module', default: [] })
+  modules: Types.ObjectId[];
+}
+
+export const CourseSchema = SchemaFactory.createForClass(Course);
+
+// Индексы
+CourseSchema.index({ title: 1 });
+CourseSchema.index({ slug: 1 });
+CourseSchema.index({ companyId: 1 });
+CourseSchema.index({ authorId: 1 });
+CourseSchema.index({ kind: 1 });
+CourseSchema.index({ category: 1 });
+CourseSchema.index({ publicationStatus: 1 });
+CourseSchema.index({ isFeatured: 1 });
+CourseSchema.index({ isPaid: 1 });
+
+// ============================================================================
+// MODULE SCHEMA
+// ============================================================================
+export type ModuleDocument = Module & Document;
+
+@Schema({ timestamps: true })
+export class Module {
+  @Prop({ required: true })
+  title: string;
+
+  @Prop()
+  description: string;
+
+  @Prop({ required: true, min: 1 })
+  order: number;
+
+  @Prop({ default: false })
+  isFree: boolean;
+
+  @Prop({ type: Types.ObjectId, ref: 'Course', required: true })
+  courseId: Types.ObjectId;
+
+  @Prop({ type: Object, default: {} })
+  metadata: Record<string, any>;
+}
+
+export const ModuleSchema = SchemaFactory.createForClass(Module);
+
+// Индексы
+ModuleSchema.index({ title: 1 });
+ModuleSchema.index({ courseId: 1 });
+ModuleSchema.index({ order: 1 });
+ModuleSchema.index({ isFree: 1 });
+
+// ============================================================================
+// LESSON SCHEMA
+// ============================================================================
+export type LessonDocument = Lesson & Document;
+
+@Schema({ timestamps: true })
+export class Lesson {
+  @Prop({ required: true })
+  title: string;
+
+  @Prop()
+  description: string;
+
+  @Prop()
+  content: string; // HTML/Markdown контент
+
+  @Prop({ type: String, enum: LessonType, required: true })
+  type: LessonType;
+
+  @Prop()
+  videoUrl: string; // bunny.net URL (для видео уроков)
+
+  @Prop({ default: 0 })
+  duration: number; // в минутах
+
+  @Prop({ required: true, min: 1 })
+  order: number;
+
+  @Prop({ default: false })
+  isFree: boolean;
+
+  @Prop({ type: Types.ObjectId, ref: 'Module', required: true })
+  moduleId: Types.ObjectId;
+
+  @Prop({ type: [Types.ObjectId], ref: 'Tariff', default: [] })
+  tariffs: Types.ObjectId[]; // К каким тарифам привязан урок
+
+  @Prop({ type: [String], default: [] })
+  attachments: string[]; // uploadthings URLs
+
+  @Prop({ type: Object, default: {} })
+  metadata: Record<string, any>;
+
+  // Специфичные поля для разных типов уроков
+  @Prop({ type: Object, default: {} })
+  quizData?: Record<string, any>; // Для опросов
+
+  @Prop({ type: Object, default: {} })
+  presentationData?: Record<string, any>; // Для презентаций
+}
+
+export const LessonSchema = SchemaFactory.createForClass(Lesson);
+
+// Индексы
+LessonSchema.index({ title: 1 });
+LessonSchema.index({ moduleId: 1 });
+LessonSchema.index({ order: 1 });
+LessonSchema.index({ type: 1 });
+LessonSchema.index({ isFree: 1 });
+LessonSchema.index({ tariffs: 1 });
+
+// ============================================================================
+// TARIFF SCHEMA
+// ============================================================================
+export type TariffDocument = Tariff & Document;
+
+@Schema({ timestamps: true })
+export class Tariff {
+  @Prop({ required: true })
+  name: string;
+
+  @Prop()
+  description: string;
+
+  @Prop()
+  image: string; // URL изображения тарифа
+
+  @Prop({ min: 0 })
+  oldPrice?: number; // Старая цена (не обязательна)
+
+  @Prop({ required: true, min: 0 })
+  newPrice: number; // Новая цена (основная)
+
+  @Prop({ required: true, default: 'USD' })
+  currency: string;
+
+  @Prop({ required: true, min: 0, default: 0 })
+  duration: number; // длительность в днях (0 = бессрочный доступ)
+
+  @Prop({ type: String, enum: TariffStatus, default: TariffStatus.ACTIVE })
+  status: TariffStatus;
+
+  @Prop({ type: Types.ObjectId, ref: 'Course', required: true })
+  courseId: Types.ObjectId;
+
+  @Prop({ type: [Types.ObjectId], ref: 'Lesson', default: [] })
+  lessonIds: Types.ObjectId[]; // Для обычных курсов
+
+  @Prop({ type: [Types.ObjectId], ref: 'Workout', default: [] })
+  workoutIds: Types.ObjectId[]; // Для фитнес-курсов
+
+  @Prop({ type: [String], default: [] })
+  advantages: string[]; // Преимущества тарифа
+
+  @Prop({ default: false })
+  includesDoctor: boolean; // Включает ли тариф доктора
+
+  @Prop({ type: Object, default: {} })
+  features: Record<string, any>; // Дополнительные возможности
+}
+
+export const TariffSchema = SchemaFactory.createForClass(Tariff);
+
+// Индексы
+TariffSchema.index({ name: 1 });
+TariffSchema.index({ courseId: 1 });
+TariffSchema.index({ status: 1 });
+TariffSchema.index({ newPrice: 1 });
+TariffSchema.index({ duration: 1 });
+
+// ============================================================================
+// MEAL SCHEMA
+// ============================================================================
+export type MealDocument = Meal & Document;
+
+@Schema({ timestamps: true })
+export class Meal {
+  @Prop({ required: true })
+  title: string;
+
+  @Prop()
+  description: string;
+
+  @Prop({ min: 0 })
+  calories: number;
+
+  @Prop({ min: 0 })
+  proteins: number; // в граммах
+
+  @Prop({ min: 0 })
+  fats: number; // в граммах
+
+  @Prop({ min: 0 })
+  carbohydrates: number; // в граммах
+
+  @Prop()
+  image: string; // URL изображения
+
+  @Prop()
+  recipe: string; // рецепт приготовления
+
+  @Prop({ type: String, enum: DietaryCategory, required: true })
+  dietaryCategory: DietaryCategory;
+
+  @Prop({ type: Types.ObjectId, ref: 'Course', required: true })
+  courseId: Types.ObjectId;
+
+  @Prop({ type: [Types.ObjectId], ref: 'Tariff', default: [] })
+  tariffs: Types.ObjectId[]; // К каким тарифам привязан meal
+
+  @Prop({ type: [String], default: [] })
+  ingredients: string[];
+
+  @Prop({ type: Object, default: {} })
+  metadata: Record<string, any>;
+
+  // Пользовательские настройки (для модераторов)
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  customUserId?: Types.ObjectId; // ID пользователя, для которого настроен meal
+
+  @Prop({ default: false })
+  isCustom: boolean; // Является ли meal пользовательским
+}
+
+export const MealSchema = SchemaFactory.createForClass(Meal);
+
+// Индексы
+MealSchema.index({ title: 1 });
+MealSchema.index({ courseId: 1 });
+MealSchema.index({ dietaryCategory: 1 });
+MealSchema.index({ calories: 1 });
+MealSchema.index({ customUserId: 1 });
+MealSchema.index({ isCustom: 1 });
+MealSchema.index({ tariffs: 1 });
+
+// ============================================================================
+// WORKOUT SCHEMA
+// ============================================================================
+export type WorkoutDocument = Workout & Document;
+
+@Schema({ timestamps: true })
+export class Workout {
+  @Prop({ required: true })
+  title: string;
+
+  @Prop()
+  description: string;
+
+  @Prop({ default: 0 })
+  duration: number; // в минутах
+
+  @Prop({ required: true, min: 1 })
+  order: number;
+
+  @Prop({ default: false })
+  isFree: boolean;
+
+  @Prop({ type: Types.ObjectId, ref: 'Course', required: true })
+  courseId: Types.ObjectId;
+
+  @Prop({ type: [Types.ObjectId], ref: 'Tariff', default: [] })
+  tariffs: Types.ObjectId[]; // К каким тарифам привязан workout
+
+  @Prop({ type: [Types.ObjectId], ref: 'Exercise', default: [] })
+  exercises: Types.ObjectId[];
+
+  // Расписание
+  @Prop({ required: true })
+  month: number; // Месяц (1-12)
+
+  @Prop({ required: true })
+  week: number; // Неделя в месяце (1-5)
+
+  @Prop({ required: true })
+  day: number; // День недели (1-7)
+
+  @Prop({ type: Object, default: {} })
+  metadata: Record<string, any>;
+
+  // Пользовательские настройки (для модераторов)
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  customUserId?: Types.ObjectId; // ID пользователя, для которого настроен workout
+
+  @Prop({ default: false })
+  isCustom: boolean; // Является ли workout пользовательским
+}
+
+export const WorkoutSchema = SchemaFactory.createForClass(Workout);
+
+// Индексы
+WorkoutSchema.index({ title: 1 });
+WorkoutSchema.index({ courseId: 1 });
+WorkoutSchema.index({ order: 1 });
+WorkoutSchema.index({ isFree: 1 });
+WorkoutSchema.index({ customUserId: 1 });
+WorkoutSchema.index({ isCustom: 1 });
+WorkoutSchema.index({ tariffs: 1 });
+WorkoutSchema.index({ month: 1, week: 1, day: 1 });
+
+// ============================================================================
+// EXERCISE SCHEMA
+// ============================================================================
+export type ExerciseDocument = Exercise & Document;
+
+@Schema({ timestamps: true })
+export class Exercise {
+  @Prop({ required: true })
+  title: string;
+
+  @Prop()
+  description: string;
+
+  @Prop()
+  videoUrl: string; // Ссылка на видео упражнения
+
+  @Prop({ required: true, min: 1 })
+  repetitions: number; // Количество повторений
+
+  @Prop()
+  explanation: string; // Подробное объяснение выполнения
+
+  @Prop({ type: [Types.ObjectId], ref: 'Equipment', default: [] })
+  equipment: Types.ObjectId[]; // Необходимое оборудование
+
+  @Prop({ type: [String], default: [] })
+  targetMuscles: string[]; // Мускулы, над которыми ведется работа
+
+  @Prop({ default: 0 })
+  duration: number; // Продолжительность в секундах
+
+  @Prop({ default: 1 })
+  sets: number; // Количество подходов
+
+  @Prop({ default: 0 })
+  restTime: number; // Время отдыха между подходами в секундах
+
+  @Prop({ type: Object, default: {} })
+  metadata: Record<string, any>;
+
+  // Пользовательские настройки (для модераторов)
+  @Prop({ type: Types.ObjectId, ref: 'User' })
+  customUserId?: Types.ObjectId; // ID пользователя, для которого настроено упражнение
+
+  @Prop({ default: false })
+  isCustom: boolean; // Является ли упражнение пользовательским
+}
+
+export const ExerciseSchema = SchemaFactory.createForClass(Exercise);
+
+// Индексы
+ExerciseSchema.index({ title: 1 });
+ExerciseSchema.index({ targetMuscles: 1 });
+ExerciseSchema.index({ equipment: 1 });
+ExerciseSchema.index({ customUserId: 1 });
+ExerciseSchema.index({ isCustom: 1 });
+
+// ============================================================================
+// EQUIPMENT SCHEMA
+// ============================================================================
+export type EquipmentDocument = Equipment & Document;
+
+@Schema({ timestamps: true })
+export class Equipment {
+  @Prop({ required: true })
+  name: string;
+
+  @Prop()
+  icon: string; // URL иконки
+
+  @Prop()
+  description: string;
+
+  @Prop({ default: true })
+  isActive: boolean;
+}
+
+export const EquipmentSchema = SchemaFactory.createForClass(Equipment);
+
+// Индексы
+EquipmentSchema.index({ name: 1 });
+EquipmentSchema.index({ isActive: 1 });
+
+// ============================================================================
+// TEACHER SCHEMA
+// ============================================================================
+export type TeacherDocument = Teacher & Document;
+
+@Schema({ timestamps: true })
+export class Teacher {
+  @Prop({ required: true, unique: true })
+  email: string;
+
+  @Prop({ required: true })
+  password: string;
+
+  @Prop({ required: true })
+  firstName: string;
+
+  @Prop({ required: true })
+  lastName: string;
+
+  @Prop()
+  avatar: string;
+
+  @Prop()
+  phone: string;
+
+  @Prop({ type: String, enum: UserRole, default: UserRole.TEACHER })
+  role: UserRole;
+
+  @Prop({ default: true })
+  isActive: boolean;
+
+  @Prop({ default: false })
+  emailVerified: boolean;
+
+  @Prop({ type: [String], default: [] })
+  authProviders: string[];
+
+  @Prop()
+  lastLogin: Date;
+
+  // Специфичные для преподавателя поля
+  @Prop({ required: true })
+  specialization: string;
+
+  @Prop({ type: [String], default: [] })
+  skills: string[];
+
+  @Prop({ type: [String], default: [] })
+  certificates: string[];
+
+  @Prop()
+  experience: number; // в годах
+
+  @Prop()
+  bio: string;
+
+  @Prop({ type: [String], default: [] })
+  languages: string[];
+
+  @Prop({ type: Object, default: {} })
+  schedule: Record<string, any>;
+
+  @Prop({ type: [Types.ObjectId], ref: 'Course', default: [] })
+  courses: Types.ObjectId[];
+
+  @Prop({ type: Object, default: {} })
+  profile: Record<string, any>;
+}
+
+export const TeacherSchema = SchemaFactory.createForClass(Teacher);
+
+// Индексы
+TeacherSchema.index({ email: 1 });
+TeacherSchema.index({ role: 1 });
+TeacherSchema.index({ isActive: 1 });
+TeacherSchema.index({ specialization: 1 });
+TeacherSchema.index({ skills: 1 });
+
+// ============================================================================
+// DOCTOR SCHEMA
+// ============================================================================
+export type DoctorDocument = Doctor & Document;
+
+@Schema({ timestamps: true })
+export class Doctor {
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  userId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Course', required: true })
+  courseId: Types.ObjectId;
+
+  // Файлы, загруженные пользователем
+  @Prop({ type: [String], default: [] })
+  userFiles: string[]; // uploadthings URLs
+
+  // Файлы, загруженные представителем курса
+  @Prop({ type: [String], default: [] })
+  courseFiles: string[]; // uploadthings URLs
+
+  @Prop({ type: Object, default: {} })
+  metadata: Record<string, any>;
+
+  @Prop({ default: false })
+  isActive: boolean;
+}
+
+export const DoctorSchema = SchemaFactory.createForClass(Doctor);
+
+// Индексы
+DoctorSchema.index({ userId: 1, courseId: 1 }, { unique: true });
+DoctorSchema.index({ userId: 1 });
+DoctorSchema.index({ courseId: 1 });
+DoctorSchema.index({ isActive: 1 });
+
+// ============================================================================
+// PURCHASE SCHEMA
+// ============================================================================
+export type PurchaseDocument = Purchase & Document;
+
+@Schema({ timestamps: true })
+export class Purchase {
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  userId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Course', required: true })
+  courseId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Tariff', required: true })
+  tariffId: Types.ObjectId;
+
+  @Prop({ required: true, min: 0 })
+  amount: number;
+
+  @Prop({ required: true })
+  currency: string;
+
+  @Prop({ type: String, enum: PaymentMethod, required: true })
+  paymentMethod: PaymentMethod;
+
+  @Prop({ type: String, enum: PaymentStatus, default: PaymentStatus.PENDING })
+  paymentStatus: PaymentStatus;
+
+  @Prop()
+  transactionId: string;
+
+  @Prop()
+  accessExpiresAt: Date; // null для бессрочного доступа
+
+  @Prop({ type: Object, default: {} })
+  metadata: Record<string, any>;
+}
+
+export const PurchaseSchema = SchemaFactory.createForClass(Purchase);
+
+// Индексы
+PurchaseSchema.index({ userId: 1, courseId: 1 });
+PurchaseSchema.index({ userId: 1 });
+PurchaseSchema.index({ courseId: 1 });
+PurchaseSchema.index({ tariffId: 1 });
+PurchaseSchema.index({ paymentStatus: 1 });
+PurchaseSchema.index({ accessExpiresAt: 1 });
+PurchaseSchema.index({ transactionId: 1 });
+
+// ============================================================================
+// USER PROGRESS SCHEMA
+// ============================================================================
+export type UserProgressDocument = UserProgress & Document;
+
+@Schema({ timestamps: true })
+export class UserProgress {
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  userId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Course', required: true })
+  courseId: Types.ObjectId;
+
+  @Prop({ type: [Types.ObjectId], ref: 'Lesson', default: [] })
+  completedLessons: Types.ObjectId[];
+
+  @Prop({ min: 0, max: 100, default: 0 })
+  progressPercentage: number;
+
+  @Prop({ type: Types.ObjectId, ref: 'Lesson' })
+  lastAccessedLesson: Types.ObjectId;
+
+  @Prop()
+  startedAt: Date;
+
+  @Prop()
+  completedAt: Date;
+
+  @Prop({ type: Object, default: {} })
+  metadata: Record<string, any>;
+}
+
+export const UserProgressSchema = SchemaFactory.createForClass(UserProgress);
+
+// Индексы
+UserProgressSchema.index({ userId: 1, courseId: 1 }, { unique: true });
+UserProgressSchema.index({ userId: 1 });
+UserProgressSchema.index({ courseId: 1 });
+UserProgressSchema.index({ progressPercentage: 1 });
+
+// ============================================================================
+// EXPORT ALL SCHEMAS
+// ============================================================================
+export const Schemas = {
+  User: UserSchema,
+  Company: CompanySchema,
+  Course: CourseSchema,
+  Module: ModuleSchema,
+  Lesson: LessonSchema,
+  Tariff: TariffSchema,
+  Meal: MealSchema,
+  Workout: WorkoutSchema,
+  Exercise: ExerciseSchema,
+  Equipment: EquipmentSchema,
+  Teacher: TeacherSchema,
+  Doctor: DoctorSchema,
+  Purchase: PurchaseSchema,
+  UserProgress: UserProgressSchema,
+};
+
+// ============================================================================
+// EXPORT ALL DOCUMENT TYPES
+// ============================================================================
+export const DocumentTypes = {
+  UserDocument,
+  CompanyDocument,
+  CourseDocument,
+  ModuleDocument,
+  LessonDocument,
+  TariffDocument,
+  MealDocument,
+  WorkoutDocument,
+  ExerciseDocument,
+  EquipmentDocument,
+  TeacherDocument,
+  DoctorDocument,
+  PurchaseDocument,
+  UserProgressDocument,
+};

@@ -1,10 +1,11 @@
-import { IsString, IsEmail, IsOptional, IsEnum, IsObject, MaxLength, IsUrl, IsPhoneNumber, IsArray, IsNumber, Min, IsMongoId } from 'class-validator';
+import { IsString, IsEmail, IsOptional, IsEnum, IsObject, MaxLength, IsUrl, IsPhoneNumber, IsArray, IsNumber, Min } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { UserRole } from '@/common/types';
+import { IsStrongPassword } from '@/common/validators/password.validator';
 
 export class CreateTeacherDto {
   @ApiProperty({ 
-    description: 'Email преподавателя (уникальный в рамках компании)',
+    description: 'Email преподавателя (уникальный)',
     example: 'teacher@example.com',
     format: 'email'
   })
@@ -12,12 +13,13 @@ export class CreateTeacherDto {
   email: string;
 
   @ApiProperty({ 
-    description: 'Пароль преподавателя (минимум 8 символов)',
+    description: 'Пароль преподавателя (минимум 8 символов, должен содержать заглавную букву, строчную букву, цифру и специальный символ)',
     example: 'SecurePass123!',
     minLength: 8,
     format: 'password'
   })
   @IsString()
+  @IsStrongPassword()
   password: string;
 
   @ApiProperty({ 
@@ -56,13 +58,6 @@ export class CreateTeacherDto {
   @IsOptional()
   @IsString()
   phone?: string;
-
-  @ApiProperty({ 
-    description: 'ID компании, к которой привязан преподаватель',
-    example: '507f1f77bcf86cd799439011'
-  })
-  @IsMongoId()
-  companyId: string;
 
   @ApiProperty({ 
     description: 'Специализация преподавателя',
@@ -127,10 +122,7 @@ export class CreateTeacherDto {
     description: 'Расписание работы преподавателя',
     example: {
       monday: { start: '09:00', end: '18:00' },
-      tuesday: { start: '09:00', end: '18:00' },
-      wednesday: { start: '09:00', end: '18:00' },
-      thursday: { start: '09:00', end: '18:00' },
-      friday: { start: '09:00', end: '18:00' }
+      tuesday: { start: '09:00', end: '18:00' }
     }
   })
   @IsOptional()
@@ -141,11 +133,7 @@ export class CreateTeacherDto {
     description: 'Дополнительные данные профиля',
     example: {
       education: 'Киевский национальный университет физического воспитания и спорта',
-      achievements: ['Победитель конкурса "Лучший тренер года 2023"'],
-      socialLinks: {
-        instagram: '@anna_fitness',
-        linkedin: 'linkedin.com/in/annapetrova'
-      }
+      achievements: ['Победитель конкурса "Лучший тренер года 2023"']
     }
   })
   @IsOptional()

@@ -5,7 +5,6 @@ export declare class CreateTeacherDto {
     lastName: string;
     avatar?: string;
     phone?: string;
-    companyId: string;
     specialization: string;
     skills?: string[];
     certificates?: string[];

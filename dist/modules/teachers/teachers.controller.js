@@ -30,47 +30,29 @@ let TeachersController = class TeachersController {
     create(createTeacherDto) {
         return this.teachersService.create(createTeacherDto);
     }
-    findAll(query, req) {
-        const userCompanyId = req.user.role === types_1.UserRole.ADMIN || req.user.role === types_1.UserRole.SUPERADMIN
-            ? undefined
-            : req.user.companyId;
-        return this.teachersService.findAll(query, userCompanyId);
+    findAll(query) {
+        return this.teachersService.findAll(query);
     }
-    findByCompany(companyId) {
-        return this.teachersService.findByCompany(companyId);
+    findOne(id) {
+        return this.teachersService.findOne(id);
     }
-    findBySpecialization(specialization, companyId) {
-        return this.teachersService.findBySpecialization(specialization, companyId);
+    update(id, updateTeacherDto) {
+        return this.teachersService.update(id, updateTeacherDto);
     }
-    findOne(id, req) {
-        const userCompanyId = req.user.role === types_1.UserRole.ADMIN || req.user.role === types_1.UserRole.SUPERADMIN
-            ? undefined
-            : req.user.companyId;
-        return this.teachersService.findOne(id, userCompanyId);
+    remove(id) {
+        return this.teachersService.remove(id);
     }
-    update(id, updateTeacherDto, req) {
-        const userCompanyId = req.user.role === types_1.UserRole.ADMIN || req.user.role === types_1.UserRole.SUPERADMIN
-            ? undefined
-            : req.user.companyId;
-        return this.teachersService.update(id, updateTeacherDto, userCompanyId);
+    addCourse(id, courseId) {
+        return this.teachersService.addCourse(id, courseId);
     }
-    remove(id, req) {
-        const userCompanyId = req.user.role === types_1.UserRole.ADMIN || req.user.role === types_1.UserRole.SUPERADMIN
-            ? undefined
-            : req.user.companyId;
-        return this.teachersService.remove(id, userCompanyId);
+    removeCourse(id, courseId) {
+        return this.teachersService.removeCourse(id, courseId);
     }
-    addCourse(id, courseId, req) {
-        const userCompanyId = req.user.role === types_1.UserRole.ADMIN || req.user.role === types_1.UserRole.SUPERADMIN
-            ? undefined
-            : req.user.companyId;
-        return this.teachersService.addCourse(id, courseId, userCompanyId);
+    updatePassword(id, newPassword) {
+        return this.teachersService.updatePassword(id, newPassword);
     }
-    removeCourse(id, courseId, req) {
-        const userCompanyId = req.user.role === types_1.UserRole.ADMIN || req.user.role === types_1.UserRole.SUPERADMIN
-            ? undefined
-            : req.user.companyId;
-        return this.teachersService.removeCourse(id, courseId, userCompanyId);
+    verifyEmail(id) {
+        return this.teachersService.verifyEmail(id);
     }
 };
 exports.TeachersController = TeachersController;
@@ -91,7 +73,6 @@ __decorate([
                 firstName: 'Анна',
                 lastName: 'Петрова',
                 specialization: 'Фитнес-тренер',
-                companyId: '507f1f77bcf86cd799439012',
                 role: 'teacher',
                 isActive: true,
                 createdAt: '2024-01-01T00:00:00.000Z',
@@ -116,14 +97,13 @@ __decorate([
     (0, common_1.Get)(),
     (0, swagger_1.ApiOperation)({
         summary: 'Получить список преподавателей',
-        description: 'Возвращает список преподавателей с пагинацией и фильтрацией. Администраторы видят всех преподавателей, обычные пользователи - только своей компании.'
+        description: 'Возвращает список преподавателей с пагинацией и фильтрацией.'
     }),
     (0, swagger_1.ApiQuery)({ name: 'page', required: false, description: 'Номер страницы', example: 1 }),
     (0, swagger_1.ApiQuery)({ name: 'limit', required: false, description: 'Количество элементов на странице', example: 10 }),
     (0, swagger_1.ApiQuery)({ name: 'search', required: false, description: 'Поиск по имени, фамилии или email', example: 'Анна' }),
     (0, swagger_1.ApiQuery)({ name: 'specialization', required: false, description: 'Фильтр по специализации', example: 'Фитнес-тренер' }),
     (0, swagger_1.ApiQuery)({ name: 'skills', required: false, description: 'Фильтр по навыкам', example: 'йога,пилатес' }),
-    (0, swagger_1.ApiQuery)({ name: 'companyId', required: false, description: 'Фильтр по компании', example: '507f1f77bcf86cd799439012' }),
     (0, swagger_1.ApiQuery)({ name: 'isActive', required: false, description: 'Фильтр по статусу активности', example: true }),
     (0, swagger_1.ApiQuery)({ name: 'languages', required: false, description: 'Фильтр по языкам', example: 'русский,английский' }),
     (0, swagger_1.ApiResponse)({
@@ -152,65 +132,65 @@ __decorate([
             }
         }
     }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.UNAUTHORIZED,
+        description: 'Пользователь не авторизован'
+    }),
     __param(0, (0, common_1.Query)()),
-    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [query_teacher_dto_1.QueryTeacherDto, Object]),
+    __metadata("design:paramtypes", [query_teacher_dto_1.QueryTeacherDto]),
     __metadata("design:returntype", void 0)
 ], TeachersController.prototype, "findAll", null);
-__decorate([
-    (0, common_1.Get)('company/:companyId'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Получить преподавателей по компании',
-        description: 'Возвращает список активных преподавателей конкретной компании'
-    }),
-    (0, swagger_1.ApiParam)({ name: 'companyId', description: 'ID компании', example: '507f1f77bcf86cd799439012' }),
-    (0, swagger_1.ApiResponse)({
-        status: common_1.HttpStatus.OK,
-        description: 'Список преподавателей компании получен'
-    }),
-    __param(0, (0, common_1.Param)('companyId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
-], TeachersController.prototype, "findByCompany", null);
-__decorate([
-    (0, common_1.Get)('specialization/:specialization'),
-    (0, swagger_1.ApiOperation)({
-        summary: 'Найти преподавателей по специализации',
-        description: 'Возвращает список преподавателей с определенной специализацией'
-    }),
-    (0, swagger_1.ApiParam)({ name: 'specialization', description: 'Специализация', example: 'Фитнес-тренер' }),
-    (0, swagger_1.ApiQuery)({ name: 'companyId', required: false, description: 'ID компании для фильтрации' }),
-    (0, swagger_1.ApiResponse)({
-        status: common_1.HttpStatus.OK,
-        description: 'Список преподавателей по специализации получен'
-    }),
-    __param(0, (0, common_1.Param)('specialization')),
-    __param(1, (0, common_1.Query)('companyId')),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String]),
-    __metadata("design:returntype", void 0)
-], TeachersController.prototype, "findBySpecialization", null);
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({
         summary: 'Получить преподавателя по ID',
-        description: 'Возвращает информацию о конкретном преподавателе'
+        description: 'Возвращает информацию о конкретном преподавателе по его ID.'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID преподавателя', example: '507f1f77bcf86cd799439011' }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'ID преподавателя (24-символьная hex строка)',
+        example: '507f1f77bcf86cd799439011'
+    }),
     (0, swagger_1.ApiResponse)({
         status: common_1.HttpStatus.OK,
-        description: 'Информация о преподавателе получена'
+        description: 'Преподаватель найден',
+        schema: {
+            example: {
+                _id: '507f1f77bcf86cd799439011',
+                firstName: 'Анна',
+                lastName: 'Петрова',
+                email: 'teacher@example.com',
+                specialization: 'Фитнес-тренер',
+                skills: ['персональные тренировки', 'групповые занятия', 'йога'],
+                experience: 5,
+                bio: 'Опытный фитнес-тренер с 5-летним стажем работы',
+                languages: ['русский', 'английский'],
+                isActive: true,
+                courses: [
+                    {
+                        _id: '507f1f77bcf86cd799439012',
+                        title: 'Основы фитнеса для начинающих'
+                    }
+                ]
+            }
+        }
     }),
     (0, swagger_1.ApiResponse)({
         status: common_1.HttpStatus.NOT_FOUND,
         description: 'Преподаватель не найден'
     }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.BAD_REQUEST,
+        description: 'Невалидный ID преподавателя'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.UNAUTHORIZED,
+        description: 'Пользователь не авторизован'
+    }),
     __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], TeachersController.prototype, "findOne", null);
 __decorate([
@@ -218,26 +198,49 @@ __decorate([
     (0, roles_decorator_1.Roles)(types_1.UserRole.ADMIN, types_1.UserRole.SUPERADMIN),
     (0, swagger_1.ApiOperation)({
         summary: 'Обновить преподавателя',
-        description: 'Обновляет информацию о преподавателе. Доступно только администраторам и выше.'
+        description: 'Обновляет информацию о существующем преподавателе. Доступно только администраторам и выше.'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID преподавателя', example: '507f1f77bcf86cd799439011' }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'ID преподавателя (24-символьная hex строка)',
+        example: '507f1f77bcf86cd799439011'
+    }),
     (0, swagger_1.ApiResponse)({
         status: common_1.HttpStatus.OK,
-        description: 'Преподаватель успешно обновлен'
+        description: 'Преподаватель успешно обновлен',
+        schema: {
+            example: {
+                _id: '507f1f77bcf86cd799439011',
+                firstName: 'Анна',
+                lastName: 'Петрова',
+                email: 'teacher@example.com',
+                specialization: 'Фитнес-тренер и инструктор по йоге',
+                skills: ['персональные тренировки', 'групповые занятия', 'йога', 'пилатес'],
+                experience: 6,
+                updatedAt: '2024-01-02T00:00:00.000Z'
+            }
+        }
     }),
     (0, swagger_1.ApiResponse)({
         status: common_1.HttpStatus.NOT_FOUND,
         description: 'Преподаватель не найден'
     }),
     (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.BAD_REQUEST,
+        description: 'Неверные данные или преподаватель с таким email уже существует'
+    }),
+    (0, swagger_1.ApiResponse)({
         status: common_1.HttpStatus.FORBIDDEN,
         description: 'Недостаточно прав для обновления преподавателя'
     }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.UNAUTHORIZED,
+        description: 'Пользователь не авторизован'
+    }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
-    __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, update_teacher_dto_1.UpdateTeacherDto, Object]),
+    __metadata("design:paramtypes", [String, update_teacher_dto_1.UpdateTeacherDto]),
     __metadata("design:returntype", void 0)
 ], TeachersController.prototype, "update", null);
 __decorate([
@@ -247,7 +250,11 @@ __decorate([
         summary: 'Удалить преподавателя',
         description: 'Удаляет преподавателя из системы. Доступно только администраторам и выше.'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID преподавателя', example: '507f1f77bcf86cd799439011' }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'ID преподавателя (24-символьная hex строка)',
+        example: '507f1f77bcf86cd799439011'
+    }),
     (0, swagger_1.ApiResponse)({
         status: common_1.HttpStatus.OK,
         description: 'Преподаватель успешно удален'
@@ -257,33 +264,63 @@ __decorate([
         description: 'Преподаватель не найден'
     }),
     (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.BAD_REQUEST,
+        description: 'Невалидный ID преподавателя'
+    }),
+    (0, swagger_1.ApiResponse)({
         status: common_1.HttpStatus.FORBIDDEN,
         description: 'Недостаточно прав для удаления преподавателя'
     }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.UNAUTHORIZED,
+        description: 'Пользователь не авторизован'
+    }),
     __param(0, (0, common_1.Param)('id')),
-    __param(1, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", void 0)
 ], TeachersController.prototype, "remove", null);
 __decorate([
     (0, common_1.Post)(':id/courses/:courseId'),
     (0, roles_decorator_1.Roles)(types_1.UserRole.ADMIN, types_1.UserRole.SUPERADMIN),
     (0, swagger_1.ApiOperation)({
-        summary: 'Добавить курс преподавателю',
-        description: 'Добавляет курс в список курсов преподавателя. Доступно только администраторам и выше.'
+        summary: 'Добавить курс к преподавателю',
+        description: 'Добавляет курс к списку курсов преподавателя. Доступно только администраторам и выше.'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID преподавателя', example: '507f1f77bcf86cd799439011' }),
-    (0, swagger_1.ApiParam)({ name: 'courseId', description: 'ID курса', example: '507f1f77bcf86cd799439013' }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'ID преподавателя (24-символьная hex строка)',
+        example: '507f1f77bcf86cd799439011'
+    }),
+    (0, swagger_1.ApiParam)({
+        name: 'courseId',
+        description: 'ID курса (24-символьная hex строка)',
+        example: '507f1f77bcf86cd799439012'
+    }),
     (0, swagger_1.ApiResponse)({
         status: common_1.HttpStatus.OK,
-        description: 'Курс успешно добавлен преподавателю'
+        description: 'Курс успешно добавлен к преподавателю'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.NOT_FOUND,
+        description: 'Преподаватель или курс не найден'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.BAD_REQUEST,
+        description: 'Невалидный ID или курс уже добавлен'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.FORBIDDEN,
+        description: 'Недостаточно прав для выполнения операции'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.UNAUTHORIZED,
+        description: 'Пользователь не авторизован'
     }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Param)('courseId')),
-    __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], TeachersController.prototype, "addCourse", null);
 __decorate([
@@ -293,19 +330,117 @@ __decorate([
         summary: 'Убрать курс у преподавателя',
         description: 'Убирает курс из списка курсов преподавателя. Доступно только администраторам и выше.'
     }),
-    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID преподавателя', example: '507f1f77bcf86cd799439011' }),
-    (0, swagger_1.ApiParam)({ name: 'courseId', description: 'ID курса', example: '507f1f77bcf86cd799439013' }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'ID преподавателя (24-символьная hex строка)',
+        example: '507f1f77bcf86cd799439011'
+    }),
+    (0, swagger_1.ApiParam)({
+        name: 'courseId',
+        description: 'ID курса (24-символьная hex строка)',
+        example: '507f1f77bcf86cd799439012'
+    }),
     (0, swagger_1.ApiResponse)({
         status: common_1.HttpStatus.OK,
         description: 'Курс успешно убран у преподавателя'
     }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.NOT_FOUND,
+        description: 'Преподаватель не найден'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.BAD_REQUEST,
+        description: 'Невалидный ID'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.FORBIDDEN,
+        description: 'Недостаточно прав для выполнения операции'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.UNAUTHORIZED,
+        description: 'Пользователь не авторизован'
+    }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Param)('courseId')),
-    __param(2, (0, common_1.Request)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", void 0)
 ], TeachersController.prototype, "removeCourse", null);
+__decorate([
+    (0, common_1.Patch)(':id/password'),
+    (0, roles_decorator_1.Roles)(types_1.UserRole.ADMIN, types_1.UserRole.SUPERADMIN),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Изменить пароль преподавателя',
+        description: 'Изменяет пароль преподавателя. Доступно только администраторам и выше.'
+    }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'ID преподавателя (24-символьная hex строка)',
+        example: '507f1f77bcf86cd799439011'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.OK,
+        description: 'Пароль успешно изменен'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.NOT_FOUND,
+        description: 'Преподаватель не найден'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.BAD_REQUEST,
+        description: 'Невалидный ID преподавателя'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.FORBIDDEN,
+        description: 'Недостаточно прав для изменения пароля'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.UNAUTHORIZED,
+        description: 'Пользователь не авторизован'
+    }),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)('newPassword')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String]),
+    __metadata("design:returntype", void 0)
+], TeachersController.prototype, "updatePassword", null);
+__decorate([
+    (0, common_1.Patch)(':id/verify-email'),
+    (0, roles_decorator_1.Roles)(types_1.UserRole.ADMIN, types_1.UserRole.SUPERADMIN),
+    (0, swagger_1.ApiOperation)({
+        summary: 'Подтвердить email преподавателя',
+        description: 'Отмечает email преподавателя как подтвержденный. Доступно только администраторам и выше.'
+    }),
+    (0, swagger_1.ApiParam)({
+        name: 'id',
+        description: 'ID преподавателя (24-символьная hex строка)',
+        example: '507f1f77bcf86cd799439011'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.OK,
+        description: 'Email успешно подтвержден'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.NOT_FOUND,
+        description: 'Преподаватель не найден'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.BAD_REQUEST,
+        description: 'Невалидный ID преподавателя'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.FORBIDDEN,
+        description: 'Недостаточно прав для подтверждения email'
+    }),
+    (0, swagger_1.ApiResponse)({
+        status: common_1.HttpStatus.UNAUTHORIZED,
+        description: 'Пользователь не авторизован'
+    }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], TeachersController.prototype, "verifyEmail", null);
 exports.TeachersController = TeachersController = __decorate([
     (0, swagger_1.ApiTags)('Преподаватели'),
     (0, common_1.Controller)('teachers'),

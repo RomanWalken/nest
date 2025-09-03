@@ -2,9 +2,17 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
+import { MongoExceptionFilter } from './common/filters/mongo-exception.filter';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  
+  // Настройка безопасности HTTP заголовков
+  app.use(helmet({
+    contentSecurityPolicy: process.env.NODE_ENV === 'production' ? undefined : false,
+    crossOriginEmbedderPolicy: false,
+  }));
   
   // Глобальная валидация
   app.useGlobalPipes(new ValidationPipe({ 
@@ -12,18 +20,26 @@ async function bootstrap() {
     forbidNonWhitelisted: true, 
     transform: true 
   }));
+
+  // Глобальный фильтр для ошибок MongoDB
+  app.useGlobalFilters(new MongoExceptionFilter());
+
+  // Rate limiting - защита от DoS атак  
+  // ThrottlerGuard будет автоматически применен через APP_GUARD в app.module.ts
   
-  // Включение CORS
-  app.enableCors();
+  // Настройка CORS - безопасно
   app.enableCors({
-    origin: '*',
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: process.env.NODE_ENV === 'production' 
+      ? ['https://yourdomain.com', 'https://app.yourdomain.com'] // Добавьте ваши домены
+      : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:8080'], // Локальная разработка
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
     credentials: true,
   });
   
-  // Конфигурация Swagger
-  const config = new DocumentBuilder()
+  // Конфигурация Swagger (только в разработке)
+  if (process.env.NODE_ENV !== 'production') {
+    const config = new DocumentBuilder()
     .setTitle('Online Courses Platform API')
     .setDescription(`
       ## Описание API
@@ -98,12 +114,33 @@ async function bootstrap() {
       .swagger-ui .topbar { display: none }
       .swagger-ui .info .title { font-size: 2.5em; color: #3b82f6; }
       .swagger-ui .info .description { font-size: 1.1em; line-height: 1.6; }
+      .swagger-ui .info .description h3 { color: #1f2937; margin-top: 1.5em; }
+      .swagger-ui .info .description ul { margin-left: 1.5em; }
+      .swagger-ui .info .description li { margin-bottom: 0.5em; }
+      .swagger-ui .scheme-container { background: #f8fafc; padding: 1em; border-radius: 0.5em; }
+      .swagger-ui .scheme-container .schemes-title { font-weight: bold; color: #374151; }
+      .swagger-ui .scheme-container .schemes-container { margin-top: 0.5em; }
+      .swagger-ui .scheme-container .schemes-container button { 
+        background: #3b82f6; 
+        color: white; 
+        border: none; 
+        padding: 0.5em 1em; 
+        border-radius: 0.25em; 
+        cursor: pointer; 
+      }
+      .swagger-ui .scheme-container .schemes-container button:hover { background: #2563eb; }
     `,
   });
-  
+  }
+
   const port = process.env.PORT || 3000;
   await app.listen(port);
+  
   console.log(`🚀 Приложение запущено на порту ${port}`);
-  console.log(`📚 Swagger документация доступна по адресу: http://localhost:${port}/api`);
+  if (process.env.NODE_ENV !== 'production') {
+    console.log(`📚 Swagger документация доступна по адресу: http://localhost:${port}/api`);
+  }
+  console.log(`🌐 API доступен по адресу: http://localhost:${port}`);
 }
+
 bootstrap(); 

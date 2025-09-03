@@ -45,10 +45,6 @@ __decorate([
     __metadata("design:type", String)
 ], Teacher.prototype, "role", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ type: mongoose_2.Types.ObjectId, ref: 'Company', required: true }),
-    __metadata("design:type", mongoose_2.Types.ObjectId)
-], Teacher.prototype, "companyId", void 0);
-__decorate([
     (0, mongoose_1.Prop)({ default: true }),
     __metadata("design:type", Boolean)
 ], Teacher.prototype, "isActive", void 0);
@@ -105,7 +101,6 @@ exports.Teacher = Teacher = __decorate([
 ], Teacher);
 exports.TeacherSchema = mongoose_1.SchemaFactory.createForClass(Teacher);
 exports.TeacherSchema.index({ email: 1 }, { unique: true });
-exports.TeacherSchema.index({ companyId: 1 });
 exports.TeacherSchema.index({ role: 1 });
 exports.TeacherSchema.index({ isActive: 1 });
 exports.TeacherSchema.index({ specialization: 1 });

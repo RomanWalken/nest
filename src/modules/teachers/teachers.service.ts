@@ -15,14 +15,13 @@ export class TeachersService {
   ) {}
 
   async create(createTeacherDto: CreateTeacherDto): Promise<Teacher> {
-    // Проверяем, существует ли уже преподаватель с таким email в компании
+    // Проверяем, существует ли уже преподаватель с таким email
     const existingTeacher = await this.teacherModel.findOne({
       email: createTeacherDto.email,
-      companyId: createTeacherDto.companyId,
     });
 
     if (existingTeacher) {
-      throw new BadRequestException('Преподаватель с таким email уже существует в данной компании');
+      throw new BadRequestException('Преподаватель с таким email уже существует');
     }
 
     // Хешируем пароль
@@ -37,19 +36,12 @@ export class TeachersService {
     return createdTeacher.save();
   }
 
-  async findAll(query: QueryTeacherDto, userCompanyId?: string): Promise<PaginatedResponse<Teacher>> {
-    const { page = 1, limit = 10, search, specialization, skills, companyId, isActive, languages } = query;
+  async findAll(query: QueryTeacherDto): Promise<PaginatedResponse<Teacher>> {
+    const { page = 1, limit = 10, search, specialization, skills, isActive, languages } = query;
     const skip = (page - 1) * limit;
 
     // Строим фильтр
     const filter: any = {};
-
-    // Если пользователь не админ, показываем только преподавателей его компании
-    if (userCompanyId) {
-      filter.companyId = userCompanyId;
-    } else if (companyId) {
-      filter.companyId = companyId;
-    }
 
     if (search) {
       filter.$or = [
@@ -78,7 +70,6 @@ export class TeachersService {
     const [teachers, total] = await Promise.all([
       this.teacherModel
         .find(filter)
-        .populate('companyId', 'name')
         .populate('courses', 'title')
         .sort({ createdAt: -1 })
         .skip(skip)
@@ -98,22 +89,15 @@ export class TeachersService {
     };
   }
 
-  async findOne(id: string, userCompanyId?: string): Promise<Teacher> {
+  async findOne(id: string): Promise<Teacher> {
+    // Валидация ObjectId
     if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('Неверный формат ID');
-    }
-
-    const filter: any = { _id: id };
-    
-    // Если пользователь не админ, проверяем компанию
-    if (userCompanyId) {
-      filter.companyId = userCompanyId;
+      throw new BadRequestException(`Невалидный ID преподавателя: ${id}. ID должен быть 24-символьной hex строкой.`);
     }
 
     const teacher = await this.teacherModel
-      .findOne(filter)
-      .populate('companyId', 'name')
-      .populate('courses', 'title description')
+      .findById(id)
+      .populate('courses', 'title')
       .exec();
 
     if (!teacher) {
@@ -123,33 +107,25 @@ export class TeachersService {
     return teacher;
   }
 
-  async update(id: string, updateTeacherDto: UpdateTeacherDto, userCompanyId?: string): Promise<Teacher> {
+  async findByEmail(email: string): Promise<Teacher | null> {
+    return this.teacherModel.findOne({ email }).exec();
+  }
+
+  async update(id: string, updateTeacherDto: UpdateTeacherDto): Promise<Teacher> {
+    // Валидация ObjectId
     if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('Неверный формат ID');
+      throw new BadRequestException(`Невалидный ID преподавателя: ${id}. ID должен быть 24-символьной hex строкой.`);
     }
 
-    const filter: any = { _id: id };
-    
-    // Если пользователь не админ, проверяем компанию
-    if (userCompanyId) {
-      filter.companyId = userCompanyId;
-    }
-
-    const existingTeacher = await this.teacherModel.findOne(filter);
-    if (!existingTeacher) {
-      throw new NotFoundException('Преподаватель не найден');
-    }
-
-    // Если обновляется email, проверяем уникальность в рамках компании
-    if (updateTeacherDto.email && updateTeacherDto.email !== existingTeacher.email) {
-      const emailExists = await this.teacherModel.findOne({
+    // Если обновляется email, проверяем уникальность
+    if (updateTeacherDto.email) {
+      const existingTeacher = await this.teacherModel.findOne({
         email: updateTeacherDto.email,
-        companyId: existingTeacher.companyId,
         _id: { $ne: id },
       });
 
-      if (emailExists) {
-        throw new BadRequestException('Преподаватель с таким email уже существует в данной компании');
+      if (existingTeacher) {
+        throw new BadRequestException('Преподаватель с таким email уже существует');
       }
     }
 
@@ -160,96 +136,114 @@ export class TeachersService {
 
     const updatedTeacher = await this.teacherModel
       .findByIdAndUpdate(id, updateTeacherDto, { new: true })
-      .populate('companyId', 'name')
       .populate('courses', 'title')
       .exec();
+
+    if (!updatedTeacher) {
+      throw new NotFoundException('Преподаватель не найден');
+    }
 
     return updatedTeacher;
   }
 
-  async remove(id: string, userCompanyId?: string): Promise<void> {
+  async remove(id: string): Promise<void> {
+    // Валидация ObjectId
     if (!Types.ObjectId.isValid(id)) {
-      throw new BadRequestException('Неверный формат ID');
+      throw new BadRequestException(`Невалидный ID преподавателя: ${id}. ID должен быть 24-символьной hex строкой.`);
     }
 
-    const filter: any = { _id: id };
+    const result = await this.teacherModel.findByIdAndDelete(id).exec();
     
-    // Если пользователь не админ, проверяем компанию
-    if (userCompanyId) {
-      filter.companyId = userCompanyId;
-    }
-
-    const result = await this.teacherModel.deleteOne(filter);
-    
-    if (result.deletedCount === 0) {
+    if (!result) {
       throw new NotFoundException('Преподаватель не найден');
     }
   }
 
-  async findByCompany(companyId: string): Promise<Teacher[]> {
-    return this.teacherModel
-      .find({ companyId, isActive: true })
-      .select('firstName lastName specialization skills experience')
-      .exec();
-  }
-
-  async findBySpecialization(specialization: string, companyId?: string): Promise<Teacher[]> {
-    const filter: any = { 
-      specialization: { $regex: specialization, $options: 'i' },
-      isActive: true 
-    };
-
-    if (companyId) {
-      filter.companyId = companyId;
+  async addCourse(teacherId: string, courseId: string): Promise<Teacher> {
+    // Валидация ObjectId
+    if (!Types.ObjectId.isValid(teacherId)) {
+      throw new BadRequestException(`Невалидный ID преподавателя: ${teacherId}. ID должен быть 24-символьной hex строкой.`);
+    }
+    if (!Types.ObjectId.isValid(courseId)) {
+      throw new BadRequestException(`Невалидный ID курса: ${courseId}. ID должен быть 24-символьной hex строкой.`);
     }
 
-    return this.teacherModel
-      .find(filter)
-      .select('firstName lastName specialization skills experience bio')
-      .exec();
-  }
-
-  async addCourse(teacherId: string, courseId: string, userCompanyId?: string): Promise<Teacher> {
-    if (!Types.ObjectId.isValid(teacherId) || !Types.ObjectId.isValid(courseId)) {
-      throw new BadRequestException('Неверный формат ID');
-    }
-
-    const filter: any = { _id: teacherId };
-    
-    if (userCompanyId) {
-      filter.companyId = userCompanyId;
-    }
-
-    const teacher = await this.teacherModel.findOne(filter);
+    const teacher = await this.teacherModel.findById(teacherId).exec();
     if (!teacher) {
       throw new NotFoundException('Преподаватель не найден');
     }
 
-    if (!teacher.courses.includes(new Types.ObjectId(courseId))) {
-      teacher.courses.push(new Types.ObjectId(courseId));
-      return teacher.save();
+    // Проверяем, не добавлен ли уже курс
+    if (teacher.courses.includes(new Types.ObjectId(courseId))) {
+      throw new BadRequestException('Курс уже добавлен к преподавателю');
     }
 
-    return teacher;
-  }
-
-  async removeCourse(teacherId: string, courseId: string, userCompanyId?: string): Promise<Teacher> {
-    if (!Types.ObjectId.isValid(teacherId) || !Types.ObjectId.isValid(courseId)) {
-      throw new BadRequestException('Неверный формат ID');
-    }
-
-    const filter: any = { _id: teacherId };
-    
-    if (userCompanyId) {
-      filter.companyId = userCompanyId;
-    }
-
-    const teacher = await this.teacherModel.findOne(filter);
-    if (!teacher) {
-      throw new NotFoundException('Преподаватель не найден');
-    }
-
-    teacher.courses = teacher.courses.filter(id => id.toString() !== courseId);
+    teacher.courses.push(new Types.ObjectId(courseId));
     return teacher.save();
+  }
+
+  async removeCourse(teacherId: string, courseId: string): Promise<Teacher> {
+    // Валидация ObjectId
+    if (!Types.ObjectId.isValid(teacherId)) {
+      throw new BadRequestException(`Невалидный ID преподавателя: ${teacherId}. ID должен быть 24-символьной hex строкой.`);
+    }
+    if (!Types.ObjectId.isValid(courseId)) {
+      throw new BadRequestException(`Невалидный ID курса: ${courseId}. ID должен быть 24-символьной hex строкой.`);
+    }
+
+    const teacher = await this.teacherModel.findById(teacherId).exec();
+    if (!teacher) {
+      throw new NotFoundException('Преподаватель не найден');
+    }
+
+    // Удаляем курс из списка
+    teacher.courses = teacher.courses.filter(
+      course => course.toString() !== courseId
+    );
+
+    return teacher.save();
+  }
+
+  async updatePassword(id: string, newPassword: string): Promise<void> {
+    // Валидация ObjectId
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException(`Невалидный ID преподавателя: ${id}. ID должен быть 24-символьной hex строкой.`);
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    const result = await this.teacherModel.findByIdAndUpdate(id, {
+      password: hashedPassword,
+    }).exec();
+
+    if (!result) {
+      throw new NotFoundException('Преподаватель не найден');
+    }
+  }
+
+  async verifyEmail(id: string): Promise<void> {
+    // Валидация ObjectId
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException(`Невалидный ID преподавателя: ${id}. ID должен быть 24-символьной hex строкой.`);
+    }
+
+    const result = await this.teacherModel.findByIdAndUpdate(id, {
+      emailVerified: true,
+    }).exec();
+
+    if (!result) {
+      throw new NotFoundException('Преподаватель не найден');
+    }
+  }
+
+  async updateLastLogin(id: string): Promise<void> {
+    // Валидация ObjectId
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException(`Невалидный ID преподавателя: ${id}. ID должен быть 24-символьной hex строкой.`);
+    }
+
+    await this.teacherModel.findByIdAndUpdate(id, {
+      lastLogin: new Date(),
+    }).exec();
   }
 }

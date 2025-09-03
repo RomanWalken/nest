@@ -13,6 +13,7 @@ exports.CreateUserDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
 const types_1 = require("../../../common/types");
+const password_validator_1 = require("../../../common/validators/password.validator");
 class CreateUserDto {
 }
 exports.CreateUserDto = CreateUserDto;
@@ -27,12 +28,13 @@ __decorate([
 ], CreateUserDto.prototype, "email", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Пароль пользователя (минимум 8 символов)',
+        description: 'Пароль пользователя (минимум 8 символов, должен содержать заглавную букву, строчную букву, цифру и специальный символ)',
         example: 'SecurePass123!',
         minLength: 8,
         format: 'password'
     }),
     (0, class_validator_1.IsString)(),
+    (0, password_validator_1.IsStrongPassword)(),
     __metadata("design:type", String)
 ], CreateUserDto.prototype, "password", void 0);
 __decorate([

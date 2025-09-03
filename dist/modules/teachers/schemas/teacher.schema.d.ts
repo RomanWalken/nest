@@ -9,7 +9,6 @@ export declare class Teacher {
     avatar: string;
     phone: string;
     role: UserRole;
-    companyId: Types.ObjectId;
     isActive: boolean;
     emailVerified: boolean;
     authProviders: string[];

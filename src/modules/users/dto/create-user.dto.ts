@@ -1,6 +1,7 @@
 import { IsString, IsEmail, IsOptional, IsEnum, IsObject, MaxLength, IsUrl, IsPhoneNumber } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { UserRole } from '@/common/types';
+import { IsStrongPassword } from '@/common/validators/password.validator';
 
 export class CreateUserDto {
   @ApiProperty({ 
@@ -12,12 +13,13 @@ export class CreateUserDto {
   email: string;
 
   @ApiProperty({ 
-    description: 'Пароль пользователя (минимум 8 символов)',
+    description: 'Пароль пользователя (минимум 8 символов, должен содержать заглавную букву, строчную букву, цифру и специальный символ)',
     example: 'SecurePass123!',
     minLength: 8,
     format: 'password'
   })
   @IsString()
+  @IsStrongPassword()
   password: string;
 
   @ApiProperty({ 

@@ -62,15 +62,6 @@ __decorate([
 ], QueryTeacherDto.prototype, "skills", void 0);
 __decorate([
     (0, swagger_1.ApiPropertyOptional)({
-        description: 'Фильтр по компании',
-        example: '507f1f77bcf86cd799439011'
-    }),
-    (0, class_validator_1.IsOptional)(),
-    (0, class_validator_1.IsMongoId)(),
-    __metadata("design:type", String)
-], QueryTeacherDto.prototype, "companyId", void 0);
-__decorate([
-    (0, swagger_1.ApiPropertyOptional)({
         description: 'Фильтр по статусу активности',
         example: true
     }),

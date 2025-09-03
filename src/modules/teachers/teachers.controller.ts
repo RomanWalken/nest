@@ -44,7 +44,6 @@ export class TeachersController {
         firstName: 'Анна',
         lastName: 'Петрова',
         specialization: 'Фитнес-тренер',
-        companyId: '507f1f77bcf86cd799439012',
         role: 'teacher',
         isActive: true,
         createdAt: '2024-01-01T00:00:00.000Z',
@@ -67,14 +66,13 @@ export class TeachersController {
   @Get()
   @ApiOperation({ 
     summary: 'Получить список преподавателей',
-    description: 'Возвращает список преподавателей с пагинацией и фильтрацией. Администраторы видят всех преподавателей, обычные пользователи - только своей компании.'
+    description: 'Возвращает список преподавателей с пагинацией и фильтрацией.'
   })
   @ApiQuery({ name: 'page', required: false, description: 'Номер страницы', example: 1 })
   @ApiQuery({ name: 'limit', required: false, description: 'Количество элементов на странице', example: 10 })
   @ApiQuery({ name: 'search', required: false, description: 'Поиск по имени, фамилии или email', example: 'Анна' })
   @ApiQuery({ name: 'specialization', required: false, description: 'Фильтр по специализации', example: 'Фитнес-тренер' })
   @ApiQuery({ name: 'skills', required: false, description: 'Фильтр по навыкам', example: 'йога,пилатес' })
-  @ApiQuery({ name: 'companyId', required: false, description: 'Фильтр по компании', example: '507f1f77bcf86cd799439012' })
   @ApiQuery({ name: 'isActive', required: false, description: 'Фильтр по статусу активности', example: true })
   @ApiQuery({ name: 'languages', required: false, description: 'Фильтр по языкам', example: 'русский,английский' })
   @ApiResponse({ 
@@ -103,94 +101,109 @@ export class TeachersController {
       }
     }
   })
-  findAll(@Query() query: QueryTeacherDto, @Request() req) {
-    const userCompanyId = req.user.role === UserRole.ADMIN || req.user.role === UserRole.SUPERADMIN 
-      ? undefined 
-      : req.user.companyId;
-    return this.teachersService.findAll(query, userCompanyId);
-  }
-
-  @Get('company/:companyId')
-  @ApiOperation({ 
-    summary: 'Получить преподавателей по компании',
-    description: 'Возвращает список активных преподавателей конкретной компании'
-  })
-  @ApiParam({ name: 'companyId', description: 'ID компании', example: '507f1f77bcf86cd799439012' })
   @ApiResponse({ 
-    status: HttpStatus.OK, 
-    description: 'Список преподавателей компании получен' 
+    status: HttpStatus.UNAUTHORIZED, 
+    description: 'Пользователь не авторизован' 
   })
-  findByCompany(@Param('companyId') companyId: string) {
-    return this.teachersService.findByCompany(companyId);
-  }
-
-  @Get('specialization/:specialization')
-  @ApiOperation({ 
-    summary: 'Найти преподавателей по специализации',
-    description: 'Возвращает список преподавателей с определенной специализацией'
-  })
-  @ApiParam({ name: 'specialization', description: 'Специализация', example: 'Фитнес-тренер' })
-  @ApiQuery({ name: 'companyId', required: false, description: 'ID компании для фильтрации' })
-  @ApiResponse({ 
-    status: HttpStatus.OK, 
-    description: 'Список преподавателей по специализации получен' 
-  })
-  findBySpecialization(
-    @Param('specialization') specialization: string,
-    @Query('companyId') companyId?: string
-  ) {
-    return this.teachersService.findBySpecialization(specialization, companyId);
+  findAll(@Query() query: QueryTeacherDto) {
+    return this.teachersService.findAll(query);
   }
 
   @Get(':id')
   @ApiOperation({ 
     summary: 'Получить преподавателя по ID',
-    description: 'Возвращает информацию о конкретном преподавателе'
+    description: 'Возвращает информацию о конкретном преподавателе по его ID.'
   })
-  @ApiParam({ name: 'id', description: 'ID преподавателя', example: '507f1f77bcf86cd799439011' })
+  @ApiParam({ 
+    name: 'id', 
+    description: 'ID преподавателя (24-символьная hex строка)', 
+    example: '507f1f77bcf86cd799439011' 
+  })
   @ApiResponse({ 
     status: HttpStatus.OK, 
-    description: 'Информация о преподавателе получена' 
+    description: 'Преподаватель найден',
+    schema: {
+      example: {
+        _id: '507f1f77bcf86cd799439011',
+        firstName: 'Анна',
+        lastName: 'Петрова',
+        email: 'teacher@example.com',
+        specialization: 'Фитнес-тренер',
+        skills: ['персональные тренировки', 'групповые занятия', 'йога'],
+        experience: 5,
+        bio: 'Опытный фитнес-тренер с 5-летним стажем работы',
+        languages: ['русский', 'английский'],
+        isActive: true,
+        courses: [
+          {
+            _id: '507f1f77bcf86cd799439012',
+            title: 'Основы фитнеса для начинающих'
+          }
+        ]
+      }
+    }
   })
   @ApiResponse({ 
     status: HttpStatus.NOT_FOUND, 
     description: 'Преподаватель не найден' 
   })
-  findOne(@Param('id') id: string, @Request() req) {
-    const userCompanyId = req.user.role === UserRole.ADMIN || req.user.role === UserRole.SUPERADMIN 
-      ? undefined 
-      : req.user.companyId;
-    return this.teachersService.findOne(id, userCompanyId);
+  @ApiResponse({ 
+    status: HttpStatus.BAD_REQUEST, 
+    description: 'Невалидный ID преподавателя' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.UNAUTHORIZED, 
+    description: 'Пользователь не авторизован' 
+  })
+  findOne(@Param('id') id: string) {
+    return this.teachersService.findOne(id);
   }
 
   @Patch(':id')
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ 
     summary: 'Обновить преподавателя',
-    description: 'Обновляет информацию о преподавателе. Доступно только администраторам и выше.'
+    description: 'Обновляет информацию о существующем преподавателе. Доступно только администраторам и выше.'
   })
-  @ApiParam({ name: 'id', description: 'ID преподавателя', example: '507f1f77bcf86cd799439011' })
+  @ApiParam({ 
+    name: 'id', 
+    description: 'ID преподавателя (24-символьная hex строка)', 
+    example: '507f1f77bcf86cd799439011' 
+  })
   @ApiResponse({ 
     status: HttpStatus.OK, 
-    description: 'Преподаватель успешно обновлен' 
+    description: 'Преподаватель успешно обновлен',
+    schema: {
+      example: {
+        _id: '507f1f77bcf86cd799439011',
+        firstName: 'Анна',
+        lastName: 'Петрова',
+        email: 'teacher@example.com',
+        specialization: 'Фитнес-тренер и инструктор по йоге',
+        skills: ['персональные тренировки', 'групповые занятия', 'йога', 'пилатес'],
+        experience: 6,
+        updatedAt: '2024-01-02T00:00:00.000Z'
+      }
+    }
   })
   @ApiResponse({ 
     status: HttpStatus.NOT_FOUND, 
     description: 'Преподаватель не найден' 
   })
   @ApiResponse({ 
+    status: HttpStatus.BAD_REQUEST, 
+    description: 'Неверные данные или преподаватель с таким email уже существует' 
+  })
+  @ApiResponse({ 
     status: HttpStatus.FORBIDDEN, 
     description: 'Недостаточно прав для обновления преподавателя' 
   })
-  update(
-    @Param('id') id: string, 
-    @Body() updateTeacherDto: UpdateTeacherDto,
-    @Request() req
-  ) {
-    const userCompanyId = req.user.role === UserRole.ADMIN || req.user.role === UserRole.SUPERADMIN 
-      ? undefined 
-      : req.user.companyId;
-    return this.teachersService.update(id, updateTeacherDto, userCompanyId);
+  @ApiResponse({ 
+    status: HttpStatus.UNAUTHORIZED, 
+    description: 'Пользователь не авторизован' 
+  })
+  update(@Param('id') id: string, @Body() updateTeacherDto: UpdateTeacherDto) {
+    return this.teachersService.update(id, updateTeacherDto);
   }
 
   @Delete(':id')
@@ -199,7 +212,11 @@ export class TeachersController {
     summary: 'Удалить преподавателя',
     description: 'Удаляет преподавателя из системы. Доступно только администраторам и выше.'
   })
-  @ApiParam({ name: 'id', description: 'ID преподавателя', example: '507f1f77bcf86cd799439011' })
+  @ApiParam({ 
+    name: 'id', 
+    description: 'ID преподавателя (24-символьная hex строка)', 
+    example: '507f1f77bcf86cd799439011' 
+  })
   @ApiResponse({ 
     status: HttpStatus.OK, 
     description: 'Преподаватель успешно удален' 
@@ -209,37 +226,62 @@ export class TeachersController {
     description: 'Преподаватель не найден' 
   })
   @ApiResponse({ 
+    status: HttpStatus.BAD_REQUEST, 
+    description: 'Невалидный ID преподавателя' 
+  })
+  @ApiResponse({ 
     status: HttpStatus.FORBIDDEN, 
     description: 'Недостаточно прав для удаления преподавателя' 
   })
-  remove(@Param('id') id: string, @Request() req) {
-    const userCompanyId = req.user.role === UserRole.ADMIN || req.user.role === UserRole.SUPERADMIN 
-      ? undefined 
-      : req.user.companyId;
-    return this.teachersService.remove(id, userCompanyId);
+  @ApiResponse({ 
+    status: HttpStatus.UNAUTHORIZED, 
+    description: 'Пользователь не авторизован' 
+  })
+  remove(@Param('id') id: string) {
+    return this.teachersService.remove(id);
   }
 
   @Post(':id/courses/:courseId')
   @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
   @ApiOperation({ 
-    summary: 'Добавить курс преподавателю',
-    description: 'Добавляет курс в список курсов преподавателя. Доступно только администраторам и выше.'
+    summary: 'Добавить курс к преподавателю',
+    description: 'Добавляет курс к списку курсов преподавателя. Доступно только администраторам и выше.'
   })
-  @ApiParam({ name: 'id', description: 'ID преподавателя', example: '507f1f77bcf86cd799439011' })
-  @ApiParam({ name: 'courseId', description: 'ID курса', example: '507f1f77bcf86cd799439013' })
+  @ApiParam({ 
+    name: 'id', 
+    description: 'ID преподавателя (24-символьная hex строка)', 
+    example: '507f1f77bcf86cd799439011' 
+  })
+  @ApiParam({ 
+    name: 'courseId', 
+    description: 'ID курса (24-символьная hex строка)', 
+    example: '507f1f77bcf86cd799439012' 
+  })
   @ApiResponse({ 
     status: HttpStatus.OK, 
-    description: 'Курс успешно добавлен преподавателю' 
+    description: 'Курс успешно добавлен к преподавателю' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.NOT_FOUND, 
+    description: 'Преподаватель или курс не найден' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.BAD_REQUEST, 
+    description: 'Невалидный ID или курс уже добавлен' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.FORBIDDEN, 
+    description: 'Недостаточно прав для выполнения операции' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.UNAUTHORIZED, 
+    description: 'Пользователь не авторизован' 
   })
   addCourse(
     @Param('id') id: string,
     @Param('courseId') courseId: string,
-    @Request() req
   ) {
-    const userCompanyId = req.user.role === UserRole.ADMIN || req.user.role === UserRole.SUPERADMIN 
-      ? undefined 
-      : req.user.companyId;
-    return this.teachersService.addCourse(id, courseId, userCompanyId);
+    return this.teachersService.addCourse(id, courseId);
   }
 
   @Delete(':id/courses/:courseId')
@@ -248,20 +290,113 @@ export class TeachersController {
     summary: 'Убрать курс у преподавателя',
     description: 'Убирает курс из списка курсов преподавателя. Доступно только администраторам и выше.'
   })
-  @ApiParam({ name: 'id', description: 'ID преподавателя', example: '507f1f77bcf86cd799439011' })
-  @ApiParam({ name: 'courseId', description: 'ID курса', example: '507f1f77bcf86cd799439013' })
+  @ApiParam({ 
+    name: 'id', 
+    description: 'ID преподавателя (24-символьная hex строка)', 
+    example: '507f1f77bcf86cd799439011' 
+  })
+  @ApiParam({ 
+    name: 'courseId', 
+    description: 'ID курса (24-символьная hex строка)', 
+    example: '507f1f77bcf86cd799439012' 
+  })
   @ApiResponse({ 
     status: HttpStatus.OK, 
     description: 'Курс успешно убран у преподавателя' 
   })
+  @ApiResponse({ 
+    status: HttpStatus.NOT_FOUND, 
+    description: 'Преподаватель не найден' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.BAD_REQUEST, 
+    description: 'Невалидный ID' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.FORBIDDEN, 
+    description: 'Недостаточно прав для выполнения операции' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.UNAUTHORIZED, 
+    description: 'Пользователь не авторизован' 
+  })
   removeCourse(
     @Param('id') id: string,
     @Param('courseId') courseId: string,
-    @Request() req
   ) {
-    const userCompanyId = req.user.role === UserRole.ADMIN || req.user.role === UserRole.SUPERADMIN 
-      ? undefined 
-      : req.user.companyId;
-    return this.teachersService.removeCourse(id, courseId, userCompanyId);
+    return this.teachersService.removeCourse(id, courseId);
+  }
+
+  @Patch(':id/password')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({ 
+    summary: 'Изменить пароль преподавателя',
+    description: 'Изменяет пароль преподавателя. Доступно только администраторам и выше.'
+  })
+  @ApiParam({ 
+    name: 'id', 
+    description: 'ID преподавателя (24-символьная hex строка)', 
+    example: '507f1f77bcf86cd799439011' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.OK, 
+    description: 'Пароль успешно изменен' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.NOT_FOUND, 
+    description: 'Преподаватель не найден' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.BAD_REQUEST, 
+    description: 'Невалидный ID преподавателя' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.FORBIDDEN, 
+    description: 'Недостаточно прав для изменения пароля' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.UNAUTHORIZED, 
+    description: 'Пользователь не авторизован' 
+  })
+  updatePassword(
+    @Param('id') id: string,
+    @Body('newPassword') newPassword: string,
+  ) {
+    return this.teachersService.updatePassword(id, newPassword);
+  }
+
+  @Patch(':id/verify-email')
+  @Roles(UserRole.ADMIN, UserRole.SUPERADMIN)
+  @ApiOperation({ 
+    summary: 'Подтвердить email преподавателя',
+    description: 'Отмечает email преподавателя как подтвержденный. Доступно только администраторам и выше.'
+  })
+  @ApiParam({ 
+    name: 'id', 
+    description: 'ID преподавателя (24-символьная hex строка)', 
+    example: '507f1f77bcf86cd799439011' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.OK, 
+    description: 'Email успешно подтвержден' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.NOT_FOUND, 
+    description: 'Преподаватель не найден' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.BAD_REQUEST, 
+    description: 'Невалидный ID преподавателя' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.FORBIDDEN, 
+    description: 'Недостаточно прав для подтверждения email' 
+  })
+  @ApiResponse({ 
+    status: HttpStatus.UNAUTHORIZED, 
+    description: 'Пользователь не авторизован' 
+  })
+  verifyEmail(@Param('id') id: string) {
+    return this.teachersService.verifyEmail(id);
   }
 }

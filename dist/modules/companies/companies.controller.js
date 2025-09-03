@@ -22,6 +22,7 @@ const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 const roles_guard_1 = require("../auth/guards/roles.guard");
 const roles_decorator_1 = require("../auth/decorators/roles.decorator");
 const types_1 = require("../../common/types");
+const mongoose_1 = require("mongoose");
 let CompaniesController = class CompaniesController {
     constructor(companiesService) {
         this.companiesService = companiesService;
@@ -39,12 +40,21 @@ let CompaniesController = class CompaniesController {
         return this.companiesService.findByDomain(domain);
     }
     findOne(id) {
+        if (!mongoose_1.Types.ObjectId.isValid(id)) {
+            throw new common_1.BadRequestException(`Невалидный ID компании: ${id}. ID должен быть 24-символьной hex строкой.`);
+        }
         return this.companiesService.findOne(id);
     }
     update(id, updateCompanyDto) {
+        if (!mongoose_1.Types.ObjectId.isValid(id)) {
+            throw new common_1.BadRequestException(`Невалидный ID компании: ${id}. ID должен быть 24-символьной hex строкой.`);
+        }
         return this.companiesService.update(id, updateCompanyDto);
     }
     remove(id) {
+        if (!mongoose_1.Types.ObjectId.isValid(id)) {
+            throw new common_1.BadRequestException(`Невалидный ID компании: ${id}. ID должен быть 24-символьной hex строкой.`);
+        }
         return this.companiesService.remove(id);
     }
 };
@@ -76,6 +86,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)('slug/:slug'),
     (0, swagger_1.ApiOperation)({ summary: 'Получить компанию по slug' }),
+    (0, swagger_1.ApiParam)({ name: 'slug', description: 'Slug компании', example: 'fitness-academy' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Компания найдена' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Компания не найдена' }),
     __param(0, (0, common_1.Param)('slug')),
@@ -86,6 +97,7 @@ __decorate([
 __decorate([
     (0, common_1.Get)('domain/:domain'),
     (0, swagger_1.ApiOperation)({ summary: 'Получить компанию по domain' }),
+    (0, swagger_1.ApiParam)({ name: 'domain', description: 'Домен компании', example: 'fitness.example.com' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Компания найдена' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Компания не найдена' }),
     __param(0, (0, common_1.Param)('domain')),
@@ -96,7 +108,9 @@ __decorate([
 __decorate([
     (0, common_1.Get)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Получить компанию по ID' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID компании (24-символьная hex строка)', example: '507f1f77bcf86cd799439011' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Компания найдена' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Невалидный ID компании' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Компания не найдена' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -109,7 +123,9 @@ __decorate([
     (0, roles_decorator_1.Roles)(types_1.UserRole.ADMIN, types_1.UserRole.SUPERADMIN),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Обновить компанию' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID компании (24-символьная hex строка)', example: '507f1f77bcf86cd799439011' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Компания успешно обновлена' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Невалидный ID компании' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Компания не найдена' }),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
@@ -123,7 +139,9 @@ __decorate([
     (0, roles_decorator_1.Roles)(types_1.UserRole.ADMIN, types_1.UserRole.SUPERADMIN),
     (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Удалить компанию' }),
+    (0, swagger_1.ApiParam)({ name: 'id', description: 'ID компании (24-символьная hex строка)', example: '507f1f77bcf86cd799439011' }),
     (0, swagger_1.ApiResponse)({ status: 200, description: 'Компания успешно удалена' }),
+    (0, swagger_1.ApiResponse)({ status: 400, description: 'Невалидный ID компании' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Компания не найдена' }),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),

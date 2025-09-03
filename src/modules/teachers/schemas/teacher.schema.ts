@@ -27,9 +27,6 @@ export class Teacher {
   @Prop({ type: String, enum: UserRole, default: UserRole.TEACHER })
   role: UserRole;
 
-  @Prop({ type: Types.ObjectId, ref: 'Company', required: true })
-  companyId: Types.ObjectId;
-
   @Prop({ default: true })
   isActive: boolean;
 
@@ -75,7 +72,6 @@ export const TeacherSchema = SchemaFactory.createForClass(Teacher);
 
 // Индексы
 TeacherSchema.index({ email: 1 }, { unique: true });
-TeacherSchema.index({ companyId: 1 });
 TeacherSchema.index({ role: 1 });
 TeacherSchema.index({ isActive: 1 });
 TeacherSchema.index({ specialization: 1 });

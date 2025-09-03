@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsBoolean, IsMongoId, IsArray } from 'class-validator';
+import { IsOptional, IsString, IsBoolean, IsArray } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { PaginationDto } from '@/common/types';
 
@@ -17,6 +17,7 @@ export class QueryTeacherDto implements PaginationDto {
     maximum: 100
   })
   limit?: number;
+
   @ApiPropertyOptional({ 
     description: 'Поиск по имени, фамилии или email',
     example: 'Анна'
@@ -41,14 +42,6 @@ export class QueryTeacherDto implements PaginationDto {
   @IsArray()
   @IsString({ each: true })
   skills?: string[];
-
-  @ApiPropertyOptional({ 
-    description: 'Фильтр по компании',
-    example: '507f1f77bcf86cd799439011'
-  })
-  @IsOptional()
-  @IsMongoId()
-  companyId?: string;
 
   @ApiPropertyOptional({ 
     description: 'Фильтр по статусу активности',

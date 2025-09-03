@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Company, CompanyDocument } from './schemas/company.schema';
+import { Company } from './schemas/company.schema';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { PaginationDto } from '@/common/types';
@@ -9,22 +9,10 @@ import { PaginationDto } from '@/common/types';
 @Injectable()
 export class CompaniesService {
   constructor(
-    @InjectModel(Company.name) private companyModel: Model<CompanyDocument>,
+    @InjectModel(Company.name) private companyModel: Model<Company>,
   ) {}
 
   async create(createCompanyDto: CreateCompanyDto, ownerId: string): Promise<Company> {
-    // Проверяем уникальность slug и domain
-    const existingCompany = await this.companyModel.findOne({
-      $or: [
-        { slug: createCompanyDto.slug },
-        { domain: createCompanyDto.domain }
-      ]
-    });
-
-    if (existingCompany) {
-      throw new ConflictException('Компания с таким slug или domain уже существует');
-    }
-
     const company = new this.companyModel({
       ...createCompanyDto,
       ownerId: new Types.ObjectId(ownerId),
@@ -65,6 +53,11 @@ export class CompaniesService {
   }
 
   async findOne(id: string): Promise<Company> {
+    // Валидация ObjectId
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException(`Невалидный ID компании: ${id}. ID должен быть 24-символьной hex строкой.`);
+    }
+
     const company = await this.companyModel
       .findById(id)
       .populate('ownerId', 'firstName lastName email')
@@ -104,6 +97,11 @@ export class CompaniesService {
   }
 
   async update(id: string, updateCompanyDto: UpdateCompanyDto): Promise<Company> {
+    // Валидация ObjectId
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException(`Невалидный ID компании: ${id}. ID должен быть 24-символьной hex строкой.`);
+    }
+
     const company = await this.companyModel
       .findByIdAndUpdate(id, updateCompanyDto, { new: true })
       .populate('ownerId', 'firstName lastName email')
@@ -117,6 +115,11 @@ export class CompaniesService {
   }
 
   async remove(id: string): Promise<void> {
+    // Валидация ObjectId
+    if (!Types.ObjectId.isValid(id)) {
+      throw new BadRequestException(`Невалидный ID компании: ${id}. ID должен быть 24-символьной hex строкой.`);
+    }
+
     const result = await this.companyModel.findByIdAndDelete(id).exec();
     
     if (!result) {
@@ -125,6 +128,11 @@ export class CompaniesService {
   }
 
   async isOwner(companyId: string, userId: string): Promise<boolean> {
+    // Валидация ObjectId
+    if (!Types.ObjectId.isValid(companyId)) {
+      throw new BadRequestException(`Невалидный ID компании: ${companyId}. ID должен быть 24-символьной hex строкой.`);
+    }
+
     const company = await this.companyModel.findById(companyId).exec();
     return company?.ownerId.toString() === userId;
   }

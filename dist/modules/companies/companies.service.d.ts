@@ -1,11 +1,11 @@
 import { Model } from 'mongoose';
-import { Company, CompanyDocument } from './schemas/company.schema';
+import { Company } from './schemas/company.schema';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { PaginationDto } from '@/common/types';
 export declare class CompaniesService {
     private companyModel;
-    constructor(companyModel: Model<CompanyDocument>);
+    constructor(companyModel: Model<Company>);
     create(createCompanyDto: CreateCompanyDto, ownerId: string): Promise<Company>;
     findAll(paginationDto?: PaginationDto, companyId?: string): Promise<{
         data: Company[];

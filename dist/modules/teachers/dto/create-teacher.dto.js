@@ -12,12 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateTeacherDto = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
+const password_validator_1 = require("../../../common/validators/password.validator");
 class CreateTeacherDto {
 }
 exports.CreateTeacherDto = CreateTeacherDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Email преподавателя (уникальный в рамках компании)',
+        description: 'Email преподавателя (уникальный)',
         example: 'teacher@example.com',
         format: 'email'
     }),
@@ -26,12 +27,13 @@ __decorate([
 ], CreateTeacherDto.prototype, "email", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
-        description: 'Пароль преподавателя (минимум 8 символов)',
+        description: 'Пароль преподавателя (минимум 8 символов, должен содержать заглавную букву, строчную букву, цифру и специальный символ)',
         example: 'SecurePass123!',
         minLength: 8,
         format: 'password'
     }),
     (0, class_validator_1.IsString)(),
+    (0, password_validator_1.IsStrongPassword)(),
     __metadata("design:type", String)
 ], CreateTeacherDto.prototype, "password", void 0);
 __decorate([
@@ -75,14 +77,6 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateTeacherDto.prototype, "phone", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: 'ID компании, к которой привязан преподаватель',
-        example: '507f1f77bcf86cd799439011'
-    }),
-    (0, class_validator_1.IsMongoId)(),
-    __metadata("design:type", String)
-], CreateTeacherDto.prototype, "companyId", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'Специализация преподавателя',
@@ -153,10 +147,7 @@ __decorate([
         description: 'Расписание работы преподавателя',
         example: {
             monday: { start: '09:00', end: '18:00' },
-            tuesday: { start: '09:00', end: '18:00' },
-            wednesday: { start: '09:00', end: '18:00' },
-            thursday: { start: '09:00', end: '18:00' },
-            friday: { start: '09:00', end: '18:00' }
+            tuesday: { start: '09:00', end: '18:00' }
         }
     }),
     (0, class_validator_1.IsOptional)(),
@@ -168,11 +159,7 @@ __decorate([
         description: 'Дополнительные данные профиля',
         example: {
             education: 'Киевский национальный университет физического воспитания и спорта',
-            achievements: ['Победитель конкурса "Лучший тренер года 2023"'],
-            socialLinks: {
-                instagram: '@anna_fitness',
-                linkedin: 'linkedin.com/in/annapetrova'
-            }
+            achievements: ['Победитель конкурса "Лучший тренер года 2023"']
         }
     }),
     (0, class_validator_1.IsOptional)(),
